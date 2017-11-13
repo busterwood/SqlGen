@@ -29,7 +29,7 @@ namespace SqlGenUI
                     .ToArray<ToolStripItem>()
             );
 
-            RefreshFromDb(ConfigurationManager.ConnectionStrings["dev"]);
+            RefreshFromDb(ConfigurationManager.ConnectionStrings["local"]);
         }
 
         private void DatabaseChanged(object sender, EventArgs e)
