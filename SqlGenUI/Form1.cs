@@ -25,11 +25,20 @@ namespace SqlGenUI
             databaseToolStripMenuItem.DropDownItems.AddRange(
                 ConfigurationManager.ConnectionStrings
                     .Cast<ConnectionStringSettings>()
-                    .Select(cs => new ToolStripMenuItem(cs.Name, null, DatabaseChanged) { Tag = cs, Checked = cs.Name=="local" })
+                    .Select(cs => new ToolStripMenuItem(cs.Name, null, DatabaseChanged) { Tag = cs, Checked = cs.Name == "local" })
                     .ToArray<ToolStripItem>()
             );
 
+            ResizeListHeaders();
+
             RefreshFromDb(ConfigurationManager.ConnectionStrings["local"]);
+        }
+
+        private void ResizeListHeaders()
+        {
+            tableList.Columns[0].Width = tableList.Width - 4 - SystemInformation.VerticalScrollBarWidth;
+            fkList.Columns[0].Width = fkList.Width - 4 - SystemInformation.VerticalScrollBarWidth;
+            codeList.Columns[0].Width = codeList.Width - 4 - SystemInformation.VerticalScrollBarWidth;
         }
 
         private void DatabaseChanged(object sender, EventArgs e)
@@ -179,6 +188,11 @@ GRANT EXECUTE ON {gen.GrantType()}::[{table.Schema}].[{table.TableName}] TO [db_
         {
             addGrantToolStripMenuItem.Checked = !addGrantToolStripMenuItem.Checked;
             GenerateSql();
+        }
+
+        private void tableLayoutPanel1_SizeChanged(object sender, EventArgs e)
+        {
+            ResizeListHeaders();
         }
     }
 }
