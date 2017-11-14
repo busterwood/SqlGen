@@ -36,12 +36,12 @@
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addGrantToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableList = new System.Windows.Forms.ListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.fkList = new System.Windows.Forms.ListView();
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.codeList = new System.Windows.Forms.ListView();
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.fkList = new System.Windows.Forms.ListView();
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tableList = new System.Windows.Forms.ListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -75,7 +75,7 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(770, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(817, 17);
             this.toolStripStatusLabel1.Spring = true;
             // 
             // menuStrip1
@@ -133,24 +133,25 @@
             this.tableLayoutPanel1.TabIndex = 9;
             this.tableLayoutPanel1.SizeChanged += new System.EventHandler(this.tableLayoutPanel1_SizeChanged);
             // 
-            // tableList
+            // codeList
             // 
-            this.tableList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1});
-            this.tableList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableList.FullRowSelect = true;
-            this.tableList.HideSelection = false;
-            this.tableList.Location = new System.Drawing.Point(3, 3);
-            this.tableList.Name = "tableList";
-            this.tableList.Size = new System.Drawing.Size(271, 169);
-            this.tableList.TabIndex = 9;
-            this.tableList.UseCompatibleStateImageBehavior = false;
-            this.tableList.View = System.Windows.Forms.View.Details;
+            this.codeList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader2});
+            this.codeList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.codeList.FullRowSelect = true;
+            this.codeList.HideSelection = false;
+            this.codeList.Location = new System.Drawing.Point(557, 3);
+            this.codeList.Name = "codeList";
+            this.codeList.Size = new System.Drawing.Size(272, 169);
+            this.codeList.TabIndex = 11;
+            this.codeList.UseCompatibleStateImageBehavior = false;
+            this.codeList.View = System.Windows.Forms.View.Details;
+            this.codeList.SelectedIndexChanged += new System.EventHandler(this.List_SelectedIndexChanged);
             // 
-            // columnHeader1
+            // columnHeader2
             // 
-            this.columnHeader1.Text = "Tables / Views";
-            this.columnHeader1.Width = 205;
+            this.columnHeader2.Text = "Code";
+            this.columnHeader2.Width = 205;
             // 
             // fkList
             // 
@@ -165,30 +166,32 @@
             this.fkList.TabIndex = 10;
             this.fkList.UseCompatibleStateImageBehavior = false;
             this.fkList.View = System.Windows.Forms.View.Details;
+            this.fkList.SelectedIndexChanged += new System.EventHandler(this.List_SelectedIndexChanged);
             // 
             // columnHeader3
             // 
             this.columnHeader3.Text = "Foreign Keys";
             this.columnHeader3.Width = 205;
             // 
-            // codeList
+            // tableList
             // 
-            this.codeList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader2});
-            this.codeList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.codeList.FullRowSelect = true;
-            this.codeList.HideSelection = false;
-            this.codeList.Location = new System.Drawing.Point(557, 3);
-            this.codeList.Name = "codeList";
-            this.codeList.Size = new System.Drawing.Size(272, 169);
-            this.codeList.TabIndex = 11;
-            this.codeList.UseCompatibleStateImageBehavior = false;
-            this.codeList.View = System.Windows.Forms.View.Details;
+            this.tableList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1});
+            this.tableList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableList.FullRowSelect = true;
+            this.tableList.HideSelection = false;
+            this.tableList.Location = new System.Drawing.Point(3, 3);
+            this.tableList.Name = "tableList";
+            this.tableList.Size = new System.Drawing.Size(271, 169);
+            this.tableList.TabIndex = 9;
+            this.tableList.UseCompatibleStateImageBehavior = false;
+            this.tableList.View = System.Windows.Forms.View.Details;
+            this.tableList.SelectedIndexChanged += new System.EventHandler(this.List_SelectedIndexChanged);
             // 
-            // columnHeader2
+            // columnHeader1
             // 
-            this.columnHeader2.Text = "Code";
-            this.columnHeader2.Width = 205;
+            this.columnHeader1.Text = "Tables / Views";
+            this.columnHeader1.Width = 205;
             // 
             // Form1
             // 
