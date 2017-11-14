@@ -6,10 +6,12 @@ namespace SqlGen.Generators
 {
     class UpdateProcGenerator : Generator
     {
+        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_Update]";
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_Update]");
+            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             foreach (var c in table.Columns.Where(c => !c.IsSequenceNumber()))
             {
                 var optional = c.IsAuditColumn() ? " = NULL" : "";

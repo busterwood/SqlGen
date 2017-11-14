@@ -6,10 +6,12 @@ namespace SqlGen.Generators
 {
     class InsertProcGenerator : Generator
     {
+        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_Insert]";
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_Insert]");
+            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             foreach (var c in table.InsertableColumns)
             {
                 var optional = c.IsAuditColumn() || c.IsSequenceNumber() ? " = NULL" : "";

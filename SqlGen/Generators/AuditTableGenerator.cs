@@ -4,10 +4,13 @@ namespace SqlGen
 {
     public class AuditTableGenerator : Generator
     {
+        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT]";
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE TABLE [{table.Schema}].[{table.TableName}_AUDIT] (");
+            sb.AppendLine($"CREATE TABLE {ObjectName(table)}");
+            sb.AppendLine("(");
             foreach (var col in table.Columns)
             {
                 var nullable = col.IsNullable() ? "NULL" : "NOT NULL";

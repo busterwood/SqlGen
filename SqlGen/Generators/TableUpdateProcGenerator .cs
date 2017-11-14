@@ -6,10 +6,12 @@ namespace SqlGen.Generators
 {
     class TableUpdateProcGenerator : Generator
     {
+        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_UpdateTable]";
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_UpdateTable]");
+            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             sb.AppendLine($"    @recs [{table.Schema}].[{table.TableName}_TABLE_TYPE] READONLY");
             sb.AppendLine("AS");
             sb.AppendLine();

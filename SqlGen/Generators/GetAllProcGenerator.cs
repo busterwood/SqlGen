@@ -6,10 +6,12 @@ namespace SqlGen.Generators
 {
     class GetAllProcGenerator : Generator
     {
+        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_GetAll]";
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_GetAll]");
+            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             sb.AppendLine("AS");
             sb.AppendLine();
 

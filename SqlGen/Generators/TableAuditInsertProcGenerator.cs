@@ -6,10 +6,12 @@ namespace SqlGen.Generators
 {
     class TableAuditInsertProcGenerator : Generator
     {
+        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT_InsertTable]";
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_AUDIT_InsertTable]");
+            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             sb.AppendLine($"    @recs [{table.Schema}].[{table.TableName}_TABLE_TYPE] READONLY");
             sb.AppendLine("    @auditType CHAR(1) = 'U'");
             sb.AppendLine("AS");

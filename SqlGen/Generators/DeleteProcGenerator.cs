@@ -6,10 +6,13 @@ namespace SqlGen.Generators
 {
     class DeleteProcGenerator : Generator
     {
+
+        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_Delete]";
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_Delete]");
+            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             foreach (var c in table.PrimaryKeyColumns)
             {
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");

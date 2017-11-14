@@ -5,10 +5,12 @@ namespace SqlGen.Generators
 {
     class AuditInsertProcGenerator : Generator
     {
+        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT_Insert]";
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_AUDIT_Insert]");
+            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             foreach (var c in table.PrimaryKeyColumns)
             {
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
@@ -46,6 +48,7 @@ namespace SqlGen.Generators
             sb.AppendLine("SET NOCOUNT OFF");
             return sb.ToString();
         }
+
 
         public override string ToString() => "Audit Insert Proc";
     }

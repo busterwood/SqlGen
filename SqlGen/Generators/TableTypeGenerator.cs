@@ -6,10 +6,12 @@ namespace SqlGen.Generators
 {
     class TableTypeGenerator : Generator
     {
+        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_TABLE_TYPE]";
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE TYPE [{table.Schema}].[{table.TableName}_TABLE_TYPE] AS TABLE");
+            sb.AppendLine($"CREATE TYPE {ObjectName(table)} AS TABLE");
             sb.AppendLine("(");
             sb.AppendLine("    [BULK_SEQ] INT NULL, -- must be set for inserts");
             foreach (var c in table.Columns.Where(c => !c.IsAuditColumn() && c.DataType != "timestamp"))

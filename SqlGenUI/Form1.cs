@@ -107,7 +107,7 @@ namespace SqlGenUI
                 sqlTextBox.Text += $@"
 GO
 
-GRANT EXECUTE ON {gen.GrantType()}::[{table.Schema}].[{table.TableName}] TO [db_execproc] AS [dbo];";
+GRANT EXECUTE ON {gen.GrantType()}::{gen.ObjectName(table, SelectedForeignKey())} TO [db_execproc];";
             }
         }
 

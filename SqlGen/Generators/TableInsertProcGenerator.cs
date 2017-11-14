@@ -6,23 +6,27 @@ namespace SqlGen.Generators
 {
     class TableInsertProcGenerator : Generator
     {
+        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_InsertTable]";
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_InsertTable]");
+            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             sb.AppendLine($"    @recs [{table.Schema}].[{table.TableName}_TABLE_TYPE] READONLY");
             sb.AppendLine("AS");
             sb.AppendLine();
-            sb.AppendLine($"INSERT INTO [{table.Schema}].[{table.TableName}]");
+            sb.AppendLine("-- using merge so we can capture BULK_SEQ column in output, 1 = 0 forces the insert");
+            sb.AppendLine($"MERGE INTO [{table.Schema}].[{table.TableName}] USING @recs AS src ON 1 = 0");
+            sb.AppendLine($"WHEN NOT MATCHED THEN INSERT");
 
-            sb.AppendLine("(");
-            foreach (var c in table.InsertableColumns)
-            {
-                sb.AppendLine($"    [{c.ColumnName}],");
-            }
-            sb.Length -= 3;
-            sb.AppendLine().AppendLine(")");
+            AddFieldNames(table, sb);
+            AddValues(sb, table);
+            AddOutput(table, sb);
+            return sb.ToString();
+        }
 
+        private static void AddOutput(Table table, StringBuilder sb)
+        {
             sb.AppendLine("OUTPUT");
             sb.AppendLine($"    src.[BULK_SEQ],");
             foreach (var c in table.Columns)
@@ -30,9 +34,24 @@ namespace SqlGen.Generators
                 sb.AppendLine($"    INSERTED.[{c.ColumnName}],");
             }
             sb.Length -= 3;
-            sb.AppendLine();
+            sb.AppendLine(";");
+        }
 
-            sb.AppendLine("SELECT");
+        private static void AddFieldNames(Table table, StringBuilder sb)
+        {
+            sb.AppendLine("(");
+            foreach (var c in table.InsertableColumns)
+            {
+                sb.AppendLine($"    [{c.ColumnName}],");
+            }
+            sb.Length -= 3;
+            sb.AppendLine().AppendLine(")");
+        }
+
+        private static void AddValues(StringBuilder sb, Table table)
+        {
+            sb.AppendLine("VALUES");
+            sb.AppendLine("(");
             foreach (var c in table.InsertableColumns)
             {
                 switch (c.ColumnName.ToUpper())
@@ -59,11 +78,7 @@ namespace SqlGen.Generators
 
             }
             sb.Length -= 3;
-            sb.AppendLine();
-            sb.AppendLine("FROM");
-            sb.AppendLine("    @recs AS src");
-
-            return sb.ToString();
+            sb.AppendLine().AppendLine(")");
         }
 
         public override string ToString() => "Table Insert";

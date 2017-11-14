@@ -6,10 +6,19 @@ namespace SqlGen.Generators
 {
     class GetProcGenerator : Generator
     {
+        public override string ObjectName(Table table, ForeignKey fk = null)
+        {
+            if (fk == null)
+                return $"[{table.Schema}].[{table.TableName}_Get]";
+
+            var name = string.Join("And", fk.TableColumns.Select(c => ToTitleCase(c.ColumnName)));
+            return $"[{table.Schema}].[{table.TableName}_GetBy{name}]";
+        }
+
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_Get]");
+            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             foreach (var c in table.PrimaryKeyColumns)
             {
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
@@ -35,7 +44,8 @@ namespace SqlGen.Generators
             {
                 sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName} AND");
             }
-            sb.Length -= 5;
+            if (table.PrimaryKeyColumns.Any())
+                sb.Length -= 5;
             sb.AppendLine();
 
             return sb.ToString();
@@ -48,7 +58,7 @@ namespace SqlGen.Generators
 
             var name = string.Join("And", fk.TableColumns.Select(c => ToTitleCase(c.ColumnName)));
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_GetBy{name}]");
+            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table, fk)}");
             foreach (var c in fk.TableColumns)
             {
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
@@ -74,7 +84,8 @@ namespace SqlGen.Generators
             {
                 sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName} AND");
             }
-            sb.Length -= 5;
+            if (table.PrimaryKeyColumns.Any())
+                sb.Length -= 5;
             sb.AppendLine();
 
             return sb.ToString();
