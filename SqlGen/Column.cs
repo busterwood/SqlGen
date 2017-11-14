@@ -27,6 +27,8 @@ namespace SqlGen
         public string DomainSchema { get; set; } //Sysname
         public string DomainName { get; set; } //sysname
         public bool IsIdentity { get; set; }
+
+        public override string ToString() => ColumnName;
     }
     public static class ColumnExtensions
     {

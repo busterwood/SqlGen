@@ -25,7 +25,7 @@ namespace SqlGenUI
             databaseToolStripMenuItem.DropDownItems.AddRange(
                 ConfigurationManager.ConnectionStrings
                     .Cast<ConnectionStringSettings>()
-                    .Select(cs => new ToolStripMenuItem(cs.Name, null, DatabaseChanged) { Tag = cs, Checked = cs.Name=="dev" })
+                    .Select(cs => new ToolStripMenuItem(cs.Name, null, DatabaseChanged) { Tag = cs, Checked = cs.Name=="local" })
                     .ToArray<ToolStripItem>()
             );
 
@@ -44,7 +44,7 @@ namespace SqlGenUI
 
         private void RefreshFromDb(ConnectionStringSettings settings)
         {
-            tableCombo.Items.Clear();
+            tableList.Items.Clear();
             RunLoadTablesAsync(settings.ConnectionString);
 
             toolStripStatusLabel1.Text = new SqlConnectionStringBuilder(settings.ConnectionString) { Password = "xxx" }.ToString();                      
@@ -53,10 +53,11 @@ namespace SqlGenUI
                 .SelectMany(asm => asm.GetTypes())
                 .Where(t => !t.IsAbstract && typeof(Generator).IsAssignableFrom(t))
                 .Select(t => Activator.CreateInstance(t))
-                .OrderBy(g => g.ToString());
+                .Select(gen => new ListViewItem { Text=gen.ToString(), Tag=gen })
+                .OrderBy(lvi => lvi.Text);
 
-            codeCombo.Items.Clear();
-            codeCombo.Items.AddRange(generators.ToArray());
+            codeList.Items.Clear();
+            codeList.Items.AddRange(generators.ToArray());
         }
 
         async Task RunLoadTablesAsync(string connectionString)
@@ -71,14 +72,14 @@ namespace SqlGenUI
 
         void SetTablesCombo(List<Table> tables)
         {
-            tableCombo.Items.AddRange(tables.ToArray());
-            tableCombo.Focus();
+            tableList.Items.AddRange(tables.Select(t => new ListViewItem { Text=t.ToString(), Tag=t }).ToArray());
+            tableList.Focus();
         }
 
-        private void combo_SelectedIndexChanged(object sender, EventArgs e)
+        private void GenerateSql()
         {
-            var table = tableCombo.SelectedItem as Table;
-            var gen = codeCombo.SelectedItem as Generator;
+            Table table = SelectedTable();
+            Generator gen = SelectedCodeGenerator();
             if (table == null || gen == null)
             {
                 sqlTextBox.Text = "";
@@ -87,20 +88,12 @@ namespace SqlGenUI
 
             if (table.Columns == null)
             {
-                var cs = ConfigurationManager.ConnectionStrings["dev"].ConnectionString;
-                using (var cnn = new SqlConnection(cs))
-                {
-                    var da = new TableDataAccess(cnn);
-                    table.Columns = da.LoadColumns(table.TableName, table.Schema);
-                    var pks = da.LoadPrimaryKeyColumns(table.TableName, table.Schema);
-                    table.PrimaryKeyColumns = pks.Select(pkc => table.Columns.Single(c => c.ColumnName == pkc.ColumnName)).ToList();
-                }
-
+                LoadFillTableDetails(table);
             }
 
-            sqlTextBox.Text = gen.Generate(table);
+            sqlTextBox.Text = gen.Generate(table, SelectedForeignKey());
 
-            if (addGrantCheckBox.Checked)
+            if (addGrantToolStripMenuItem.Checked)
             {
                 sqlTextBox.Text += $@"
 GO
@@ -109,9 +102,83 @@ GRANT EXECUTE ON {gen.GrantType()}::[{table.Schema}].[{table.TableName}] TO [db_
             }
         }
 
+        private void LoadFillTableDetails(Table table)
+        {
+            ConnectionStringSettings connectionSettings = CheckConnectionString();
+            using (var cnn = new SqlConnection(connectionSettings.ConnectionString))
+            {
+                var da = new TableDataAccess(cnn);
+                table.Columns = da.LoadColumns(table.TableName, table.Schema);
+                var pks = da.LoadPrimaryKeyColumns(table.TableName, table.Schema);
+                table.PrimaryKeyColumns = pks.Select(pkc => table.Columns.Single(c => c.ColumnName == pkc.ColumnName)).ToList();
+            }
+        }
+
+        private Generator SelectedCodeGenerator() => codeList.SelectedItems.Cast<ListViewItem>().FirstOrDefault()?.Tag as Generator;
+
+        private Table SelectedTable() => tableList.SelectedItems.Cast<ListViewItem>().FirstOrDefault()?.Tag as Table;
+
+        private ForeignKey SelectedForeignKey() => fkList.SelectedItems.Cast<ListViewItem>().FirstOrDefault()?.Tag as ForeignKey;
+
+        private ConnectionStringSettings CheckConnectionString()
+        {
+            var dbMenu = databaseToolStripMenuItem.DropDownItems.Cast<ToolStripMenuItem>().FirstOrDefault(mi => mi.Checked);
+            return (ConnectionStringSettings)dbMenu.Tag;
+        }
+
         private void sqlTextBox_MouseDown(object sender, MouseEventArgs e)
         {
             sqlTextBox.DoDragDrop(sqlTextBox.Text, DragDropEffects.Copy);
+        }
+
+        private void List_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (sender == tableList)
+                LoadForeignKeysAsync(SelectedTable());
+            GenerateSql();
+        }
+
+        private async Task LoadForeignKeysAsync(Table table)
+        {
+            fkList.Items.Clear();
+            if (table == null)
+                return;
+
+            await Task.Yield();
+            ConnectionStringSettings connectionSettings = CheckConnectionString();
+            using (var cnn = new SqlConnection(connectionSettings.ConnectionString))
+            {
+                var da = new TableDataAccess(cnn);
+                if (table.Columns == null)
+                {
+                    table.Columns = da.LoadColumns(table.TableName, table.Schema);
+                    var pks = da.LoadPrimaryKeyColumns(table.TableName, table.Schema);
+                    table.PrimaryKeyColumns = pks.Select(pkc => table.Columns.Single(c => c.ColumnName == pkc.ColumnName)).ToList();
+                }
+                table.ForeignKeys = await da.LoadForeignKeys(table.TableName, table.Schema);
+                ReplaceFKColumnsWithTableColumns(table);
+            }
+            BeginInvoke((Action<List<ForeignKey>>)PopulateForeignKeyList, table.ForeignKeys);
+        }
+
+        private void ReplaceFKColumnsWithTableColumns(Table table)
+        {
+            foreach (var fk in table.ForeignKeys)
+            {
+                fk.TableColumns = fk.TableColumns.Select(c => table.Columns.Single(col => string.Equals(col.ColumnName, c.ColumnName, StringComparison.Ordinal))).ToList();
+            }
+        }
+
+        void PopulateForeignKeyList(List<ForeignKey> fks)
+        {
+            fkList.Items.Clear();
+            fkList.Items.AddRange(fks.Select(fk => new ListViewItem { Text = fk.ConstraintName, Tag = fk }).ToArray());
+        }
+
+        private void addGrantToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            addGrantToolStripMenuItem.Checked = !addGrantToolStripMenuItem.Checked;
+            GenerateSql();
         }
     }
 }

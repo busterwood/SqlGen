@@ -10,7 +10,7 @@ namespace SqlGen.Generators
         {
             var sb = new StringBuilder();
             sb.AppendLine($"CREATE PROCEDURE [{table.Schema}].[{table.TableName}_Update]");
-            foreach (var c in table.InsertableColumns.Where(c => !c.IsSequenceNumber()))
+            foreach (var c in table.Columns.Where(c => !c.IsSequenceNumber()))
             {
                 var optional = c.IsAuditColumn() ? " = NULL" : "";
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()}{optional},");
