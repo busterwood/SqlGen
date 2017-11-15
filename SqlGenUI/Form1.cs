@@ -206,5 +206,11 @@ namespace SqlGenUI
         {
             ResizeListHeaders();
         }
+
+        private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var menu = databaseToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>().Single(mi => mi.Checked);
+            RefreshFromDb((ConnectionStringSettings)menu.Tag);
+        }
     }
 }
