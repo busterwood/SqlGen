@@ -14,7 +14,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"CREATE TYPE {ObjectName(table)} AS TABLE");
             sb.AppendLine("(");
             sb.AppendLine("    [BULK_SEQ] INT NULL, -- must be set for inserts");
-            foreach (var c in table.Columns.Where(c => !c.IsAuditColumn() && c.DataType != "timestamp"))
+            foreach (var c in table.Columns.Where(c => c.DataType != "timestamp"))
             {
                 var nullDecl = c.IsNullable() || c.IsSequenceNumber() || table.PrimaryKeyColumns.Any(col => col == c) ? "NULL" : "NOT NULL";
                 sb.AppendLine($"    [{c.ColumnName}] {c.TypeDeclaration()} {nullDecl},");
