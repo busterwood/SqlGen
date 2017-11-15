@@ -87,28 +87,37 @@ namespace SqlGenUI
 
         private void GenerateSql()
         {
-            Table table = SelectedTable();
-            Generator gen = SelectedCodeGenerator();
-            if (table == null || gen == null)
+            sqlTextBox.Text = "";
+
+            var sb = new StringBuilder();
+
+            var fks = SelectedForeignKeys().ToList();
+            if (fks.Count == 0)
+                fks.Add(null);
+
+            foreach (var table in SelectedTables())
             {
-                sqlTextBox.Text = "";
-                return;
+                if (table.Columns == null)
+                    LoadFillTableDetails(table);
+
+                foreach (var fk in fks)
+                {
+                    foreach (var gen in SelectedCodeGenerators())
+                    {
+                        sb.AppendLine(gen.Generate(table, SelectedForeignKey()));
+                        sb.AppendLine("GO");
+                        sb.AppendLine();
+                        if (addGrantToolStripMenuItem.Checked)
+                        {
+                            sb.AppendLine(gen.Grant(table, fk));
+                            sb.AppendLine("GO");
+                            sb.AppendLine();
+                        }
+                    }
+                }
             }
 
-            if (table.Columns == null)
-            {
-                LoadFillTableDetails(table);
-            }
-
-            sqlTextBox.Text = gen.Generate(table, SelectedForeignKey());
-
-            if (addGrantToolStripMenuItem.Checked)
-            {
-                sqlTextBox.Text += $@"
-GO
-
-GRANT EXECUTE ON {gen.GrantType()}::{gen.ObjectName(table, SelectedForeignKey())} TO [db_execproc];";
-            }
+            sqlTextBox.Text = sb.ToString();
         }
 
         private void LoadFillTableDetails(Table table)
@@ -124,10 +133,13 @@ GRANT EXECUTE ON {gen.GrantType()}::{gen.ObjectName(table, SelectedForeignKey())
         }
 
         private Generator SelectedCodeGenerator() => codeList.SelectedItems.Cast<ListViewItem>().FirstOrDefault()?.Tag as Generator;
+        private IEnumerable<Generator> SelectedCodeGenerators() => codeList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as Generator);
 
         private Table SelectedTable() => tableList.SelectedItems.Cast<ListViewItem>().FirstOrDefault()?.Tag as Table;
+        private IEnumerable<Table> SelectedTables() => tableList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as Table);
 
         private ForeignKey SelectedForeignKey() => fkList.SelectedItems.Cast<ListViewItem>().FirstOrDefault()?.Tag as ForeignKey;
+        private IEnumerable<ForeignKey> SelectedForeignKeys() => fkList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as ForeignKey);
 
         private ConnectionStringSettings CheckConnectionString()
         {
