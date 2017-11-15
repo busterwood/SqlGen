@@ -30,6 +30,7 @@ namespace SqlGen
 
         public override string ToString() => ColumnName;
     }
+
     public static class ColumnExtensions
     {
         public static bool IsRowVersion(this Column c) => string.Equals("timestamp", c.DataType, StringComparison.OrdinalIgnoreCase) || string.Equals("rowversion", c.DataType, StringComparison.OrdinalIgnoreCase);
@@ -52,6 +53,53 @@ namespace SqlGen
                     return c.DataType;
             }
         }
+
+        public static string TableValue(this Column c, string alias)
+        {
+            switch (c.ColumnName.ToUpper())
+            {
+                case "AUDIT_START_DATE":
+                case "AUDIT_DATE_TIME":
+                    return $"ISNULL({alias}.[{c.ColumnName}], GETUTCDATE())";
+                case "AUDIT_UPDATE_USER":
+                case "AUDIT_USER":
+                    return $"ISNULL({alias}.[{c.ColumnName}], dbo.ALL_UserContextGet())";
+                case "AUDIT_APPLICATION_NAME":
+                case "AUDIT_APPLICATION":
+                    return $"ISNULL({alias}.[{c.ColumnName}], APP_NAME())";
+                case "AUDIT_MACHINE_NAME":
+                case "AUDIT_MACHINE":
+                    return $"ISNULL({alias}.[{c.ColumnName}], HOST_NAME())";
+                case "SEQUENCE_NUMBER":
+                    return $"ISNULL({alias}.[{c.ColumnName}], 0) + 1";
+                default:
+                    return $"{alias}.[{c.ColumnName}]";
+            }
+        }
+
+        public static string ParameterValue(this Column c)
+        {
+            switch (c.ColumnName.ToUpper())
+            {
+                case "AUDIT_START_DATE":
+                case "AUDIT_DATE_TIME":
+                    return $"ISNULL(@{c.ColumnName}, GETUTCDATE())";
+                case "AUDIT_UPDATE_USER":
+                case "AUDIT_USER":
+                    return $"ISNULL(@{c.ColumnName}, dbo.ALL_UserContextGet())";
+                case "AUDIT_APPLICATION_NAME":
+                case "AUDIT_APPLICATION":
+                    return $"ISNULL(@{c.ColumnName}, APP_NAME())";
+                case "AUDIT_MACHINE_NAME":
+                case "AUDIT_MACHINE":
+                    return $"ISNULL(@{c.ColumnName}, HOST_NAME())";
+                case "SEQUENCE_NUMBER":
+                    return $"ISNULL(@{c.ColumnName}, 0) + 1";
+                default:
+                    return $"@{c.ColumnName}";
+            }
+        }
+
     }
 
 }

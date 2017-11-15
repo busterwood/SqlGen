@@ -12,7 +12,7 @@ namespace SqlGen.Generators
         {
             var sb = new StringBuilder();
             sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
-            foreach (var c in table.InsertableColumns)
+            foreach (var c in table.InsertableColumns.Where(c => !c.IsSequenceNumber()))
             {
                 var optional = c.IsAuditColumn() || c.IsSequenceNumber() ? " = NULL" : "";
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()}{optional},");
@@ -40,28 +40,10 @@ namespace SqlGen.Generators
             sb.AppendLine("(");
             foreach (var c in table.InsertableColumns)
             {
-                switch (c.ColumnName.ToUpper())
-                {
-                    case "AUDIT_START_DATE":
-                        sb.AppendLine($"    COALESCE(@{c.ColumnName}, GETUTCDATE()),");
-                        break;
-                    case "AUDIT_UPDATE_USER":
-                        sb.AppendLine($"    COALESCE(@{c.ColumnName}, dbo.ALL_UserContextGet()),");
-                        break;
-                    case "AUDIT_APPLICATION_NAME":
-                        sb.AppendLine($"    COALESCE(@{c.ColumnName}, APP_NAME()),");
-                        break;
-                    case "AUDIT_MACHINE_NAME":
-                        sb.AppendLine($"    COALESCE(@{c.ColumnName}, HOST_NAME()),");
-                        break;
-                    case "SEQUENCE_NUMBER":
-                        sb.AppendLine($"    COALESCE(@{c.ColumnName}, 1),");
-                        break;
-                    default:
-                        sb.AppendLine($"    @{c.ColumnName},");
-                        break;
-                }
-
+                if (c.IsSequenceNumber())
+                    sb.AppendLine($"    1,");
+                else
+                    sb.AppendLine($"    {c.ParameterValue()},");
             }
             sb.Length -= 3;
             sb.AppendLine().AppendLine(")");

@@ -18,6 +18,8 @@ namespace SqlGen.Generators
             sb.AppendLine($"    @recs [{table.Schema}].[{table.TableName}_TABLE_TYPE] READONLY");
             sb.AppendLine("AS");
             sb.AppendLine();
+            ExecAuditProc(table, fk, sb);
+
             sb.AppendLine($"MERGE INTO [{table.Schema}].[{table.TableName}] as target");
             sb.AppendLine($"USING @recs AS src");
             sb.AppendLine($"ON");
@@ -30,8 +32,8 @@ namespace SqlGen.Generators
 
             sb.AppendLine($"WHEN NOT MATCHED BY target THEN");
             sb.AppendLine($"INSERT");
-            AddFieldNames(table, sb);
-            AddValues(sb, table);
+            AddInsertFieldNames(table, sb);
+            AddInsertValues(sb, table);
 
             sb.AppendLine($"WHEN MATCHED THEN");
             sb.AppendLine($"UPDATE SET");
@@ -52,6 +54,22 @@ namespace SqlGen.Generators
             return sb.ToString();
         }
 
+        private static void ExecAuditProc(Table table, ForeignKey fk, StringBuilder sb)
+        {
+            if (fk == null)
+                sb.AppendLine($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs");
+            else
+            {
+                sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs");
+                foreach (var c in fk.TableColumns)
+                {
+                    sb.Append($", @{c.ColumnName}=@{c.ColumnName}");
+                }
+                sb.AppendLine();
+            }
+            sb.AppendLine();
+        }
+
         private static void AddFKParameters(ForeignKey fk, StringBuilder sb)
         {
             if (fk == null)
@@ -62,7 +80,7 @@ namespace SqlGen.Generators
             }
         }
 
-        private static void AddFieldNames(Table table, StringBuilder sb)
+        private static void AddInsertFieldNames(Table table, StringBuilder sb)
         {
             sb.AppendLine("(");
             foreach (var c in table.InsertableColumns)
@@ -73,34 +91,16 @@ namespace SqlGen.Generators
             sb.AppendLine().AppendLine(")");
         }
 
-        private static void AddValues(StringBuilder sb, Table table)
+        private static void AddInsertValues(StringBuilder sb, Table table)
         {
             sb.AppendLine("VALUES");
             sb.AppendLine("(");
             foreach (var c in table.InsertableColumns)
             {
-                switch (c.ColumnName.ToUpper())
-                {
-                    case "AUDIT_START_DATE":
-                        sb.AppendLine($"    src.COALESCE(src.[{c.ColumnName}], GETUTCDATE()),");
-                        break;
-                    case "AUDIT_UPDATE_USER":
-                        sb.AppendLine($"    src.COALESCE(src.[{c.ColumnName}], dbo.ALL_UserContextGet()),");
-                        break;
-                    case "AUDIT_APPLICATION_NAME":
-                        sb.AppendLine($"    src.COALESCE(src.[{c.ColumnName}], APP_NAME()),");
-                        break;
-                    case "AUDIT_MACHINE_NAME":
-                        sb.AppendLine($"    src.COALESCE(src.[{c.ColumnName}], HOST_NAME()),");
-                        break;
-                    case "SEQUENCE_NUMBER":
-                        sb.AppendLine($"    src.COALESCE(src.[{c.ColumnName}], 1),");
-                        break;
-                    default:
-                        sb.AppendLine($"    src.[{c.ColumnName}],");
-                        break;
-                }
-
+                if (c.IsSequenceNumber())
+                    sb.AppendLine($"    1,");
+                else
+                    sb.AppendLine($"    {c.TableValue("src")},");
             }
             sb.Length -= 3;
             sb.AppendLine().AppendLine(")");
@@ -110,31 +110,7 @@ namespace SqlGen.Generators
         {
             foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKeyColumns.Contains(col)))
             {
-                switch (c.ColumnName.ToUpper())
-                {
-                    case "AUDIT_START_DATE":
-                    case "AUDIT_DATE_TIME":
-                        sb.AppendLine($"    [{c.ColumnName}] = COALESCE(src.[{c.ColumnName}], GETUTCDATE()),");
-                        break;
-                    case "AUDIT_UPDATE_USER":
-                    case "AUDIT_USER":
-                        sb.AppendLine($"    [{c.ColumnName}] = COALESCE(src.[{c.ColumnName}], dbo.ALL_UserContextGet()),");
-                        break;
-                    case "AUDIT_APPLICATION_NAME":
-                    case "AUDIT_APPLICATION":
-                        sb.AppendLine($"    [{c.ColumnName}] = COALESCE(src.[{c.ColumnName}], APP_NAME()),");
-                        break;
-                    case "AUDIT_MACHINE_NAME":
-                    case "AUDIT_MACHINE":
-                        sb.AppendLine($"    [{c.ColumnName}] = COALESCE(src.[{c.ColumnName}], HOST_NAME()),");
-                        break;
-                    case "SEQUENCE_NUMBER":
-                        sb.AppendLine($"    [{c.ColumnName}] = [{c.ColumnName}] + 1,");
-                        break;
-                    default:
-                        sb.AppendLine($"    [{c.ColumnName}] = src.[{c.ColumnName}],");
-                        break;
-                }
+                sb.AppendLine($"    [{c.ColumnName}] = {c.TableValue("src")},");
             }
             sb.Length -= 3;
             sb.AppendLine();

@@ -22,31 +22,7 @@ namespace SqlGen.Generators
             sb.AppendLine("SET");
             foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKeyColumns.Contains(col)))
             {
-                switch (c.ColumnName.ToUpper())
-                {
-                    case "AUDIT_START_DATE":
-                    case "AUDIT_DATE_TIME":
-                        sb.AppendLine($"    [{c.ColumnName}] = COALESCE(src.[{c.ColumnName}], GETUTCDATE()),");
-                        break;
-                    case "AUDIT_UPDATE_USER":
-                    case "AUDIT_USER":
-                        sb.AppendLine($"    [{c.ColumnName}] = COALESCE(src.[{c.ColumnName}], dbo.ALL_UserContextGet()),");
-                        break;
-                    case "AUDIT_APPLICATION_NAME":
-                    case "AUDIT_APPLICATION":
-                        sb.AppendLine($"    [{c.ColumnName}] = COALESCE(src.[{c.ColumnName}], APP_NAME()),");
-                        break;
-                    case "AUDIT_MACHINE_NAME":
-                    case "AUDIT_MACHINE":
-                        sb.AppendLine($"    [{c.ColumnName}] = COALESCE(src.[{c.ColumnName}], HOST_NAME()),");
-                        break;
-                    case "SEQUENCE_NUMBER":
-                        sb.AppendLine($"    [{c.ColumnName}] = [{c.ColumnName}] + 1,");
-                        break;
-                    default:
-                        sb.AppendLine($"    [{c.ColumnName}] = src.[{c.ColumnName}],");
-                        break;
-                }
+                sb.AppendLine($"    [{c.ColumnName}] = {c.TableValue("src")},");
             }
             sb.Length -= 3;
             sb.AppendLine();
