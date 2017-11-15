@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Generators\TableAuditInsertProcGenerator.cs" />
+    <Compile Include="Generators\TableMergeProcGenerator.cs" />
     <Compile Include="Generators\TableInsertProcGenerator.cs" />
     <Compile Include="Generators\TableTypeGenerator.cs" />
     <Compile Include="Generators\GetAllProcGenerator.cs" />
