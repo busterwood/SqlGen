@@ -6,7 +6,7 @@ namespace SqlGen.Generators
 {
     class UpdateProcGenerator : Generator
     {
-        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_Update]";
+        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_Update]";
 
         public override string Generate(Table table)
         {
@@ -33,7 +33,7 @@ namespace SqlGen.Generators
         {
             sb.AppendLine();
             sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_Insert] ");
-            foreach (var c in table.PrimaryKeyColumns)
+            foreach (var c in table.PrimaryKey)
             {
                 sb.Append($"@{c.ColumnName}, ");
             }
@@ -43,7 +43,7 @@ namespace SqlGen.Generators
         private static void AppendSet(Table table, StringBuilder sb)
         {
             sb.AppendLine("SET");
-            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKeyColumns.Contains(col)))
+            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
             {
                 if (c.IsSequenceNumber())
                     sb.AppendLine($"    [{c.ColumnName}] = [{c.ColumnName}] + 1,");
@@ -68,7 +68,7 @@ namespace SqlGen.Generators
         private static void AppendWhere(Table table, StringBuilder sb)
         {
             sb.AppendLine("WHERE");
-            foreach (var c in table.PrimaryKeyColumns)
+            foreach (var c in table.PrimaryKey)
             {
                 sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName},");
             }

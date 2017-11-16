@@ -6,7 +6,7 @@ namespace SqlGen.Generators
 {
     class GetAllProcGenerator : Generator
     {
-        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_GetAll]";
+        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_GetAll]";
 
         public override string Generate(Table table)
         {

@@ -4,7 +4,7 @@ namespace SqlGen
 {
     public class AuditTableGenerator : Generator
     {
-        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT]";
+        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT]";
 
         public override string Generate(Table table)
         {
@@ -20,7 +20,7 @@ namespace SqlGen
             sb.AppendLine($"    [AUDIT_TYPE] char(1) NOT NULL,");
             sb.AppendLine($"    [AUDIT_END_DATE] datetime NOT NULL,");
             sb.Append($"    CONSTRAINT [PK_{table.TableName}_AUDIT] PRIMARY KEY CLUSTERED (");
-            foreach (var c in table.PrimaryKeyColumns)
+            foreach (var c in table.PrimaryKey)
             {
                 sb.Append($"[{c.ColumnName}], ");
             }
@@ -30,6 +30,6 @@ namespace SqlGen
         }
         public override string ToString() => "Audit Table";
 
-        public override string Grant(Table table, ForeignKey fk = null) => "";
+        public override string Grant(Table table, TableKey fk = null) => "";
     }
 }

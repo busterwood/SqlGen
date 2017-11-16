@@ -6,11 +6,11 @@ namespace SqlGen.Generators
 {
     class TableMergeProcGenerator : Generator
     {
-        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_MergeTable]";
+        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_MergeTable]";
 
         public override string Generate(Table table) => Generate(table, null);
 
-        public override string Generate(Table table, ForeignKey fk)
+        public override string Generate(Table table, TableKey fk)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
@@ -23,7 +23,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"MERGE INTO [{table.Schema}].[{table.TableName}] as target");
             sb.AppendLine($"USING @recs AS src");
             sb.AppendLine($"ON");
-            foreach (var c in table.PrimaryKeyColumns)
+            foreach (var c in table.PrimaryKey)
             {
                 sb.AppendLine($"    target.{c.ColumnName} = src.{c.ColumnName} AND");
             }
@@ -42,7 +42,7 @@ namespace SqlGen.Generators
             if (fk != null)
             {
                 sb.Append($"WHEN MATCHED BY src");
-                foreach (var c in fk.TableColumns)
+                foreach (var c in fk)
                 {
                     sb.Append($" AND target.[{c.ColumnName}] = src.[{c.ColumnName}]");
                 }
@@ -54,14 +54,14 @@ namespace SqlGen.Generators
             return sb.ToString();
         }
 
-        private static void ExecAuditProc(Table table, ForeignKey fk, StringBuilder sb)
+        private static void ExecAuditProc(Table table, TableKey fk, StringBuilder sb)
         {
             if (fk == null)
                 sb.AppendLine($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs");
             else
             {
                 sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs");
-                foreach (var c in fk.TableColumns)
+                foreach (var c in fk)
                 {
                     sb.Append($", @{c.ColumnName}=@{c.ColumnName}");
                 }
@@ -70,11 +70,11 @@ namespace SqlGen.Generators
             sb.AppendLine();
         }
 
-        private static void AddFKParameters(ForeignKey fk, StringBuilder sb)
+        private static void AddFKParameters(TableKey fk, StringBuilder sb)
         {
             if (fk == null)
                 return;
-            foreach (var c in fk.TableColumns)
+            foreach (var c in fk)
             {
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
             }
@@ -108,7 +108,7 @@ namespace SqlGen.Generators
 
         private void AddUpdateAssignments(Table table, StringBuilder sb)
         {
-            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKeyColumns.Contains(col)))
+            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
             {
                 sb.AppendLine($"    [{c.ColumnName}] = {c.TableValue("src")},");
             }

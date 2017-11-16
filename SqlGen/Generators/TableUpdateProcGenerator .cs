@@ -6,7 +6,7 @@ namespace SqlGen.Generators
 {
     class TableUpdateProcGenerator : Generator
     {
-        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_UpdateTable]";
+        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_UpdateTable]";
 
         public override string Generate(Table table)
         {
@@ -20,7 +20,7 @@ namespace SqlGen.Generators
 
             sb.AppendLine($"UPDATE [{table.Schema}].[{table.TableName}]");
             sb.AppendLine("SET");
-            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKeyColumns.Contains(col)))
+            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
             {
                 sb.AppendLine($"    [{c.ColumnName}] = {c.TableValue("src")},");
             }
@@ -38,7 +38,7 @@ namespace SqlGen.Generators
             sb.AppendLine("FROM");
             sb.AppendLine($"    [{table.Schema}].[{table.TableName}] AS target");
             sb.AppendLine("    JOIN @recs AS src ON");
-            foreach (var c in table.PrimaryKeyColumns)
+            foreach (var c in table.PrimaryKey)
             {
                 sb.AppendLine($"        target.[{c.ColumnName}] = src.[{c.ColumnName}],");
             }

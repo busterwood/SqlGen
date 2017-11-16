@@ -144,7 +144,7 @@ namespace SqlGenUI
             foreach (var table in SelectedTables())
             {
                 if (table.Columns == null)
-                    LoadFillTableDetails(table);
+                    LoadColumnsAndPrimaryKey(table);
 
                 foreach (var fk in fks)
                 {
@@ -166,15 +166,14 @@ namespace SqlGenUI
             sqlTextBox.Text = sb.ToString();
         }
 
-        private void LoadFillTableDetails(Table table)
+        private void LoadColumnsAndPrimaryKey(Table table)
         {
             ConnectionStringSettings connectionSettings = CheckConnectionString();
             using (var cnn = new SqlConnection(connectionSettings.ConnectionString))
             {
                 var da = new TableDataAccess(cnn);
                 table.Columns = da.LoadColumns(table.TableName, table.Schema);
-                var pks = da.LoadPrimaryKeyColumns(table.TableName, table.Schema);
-                table.PrimaryKeyColumns = pks.Select(pkc => table.Columns.Single(c => c.ColumnName == pkc.ColumnName)).ToList();
+                da.PopulatePrimaryKey(table);
             }
         }
 
@@ -197,7 +196,7 @@ namespace SqlGenUI
 
         private IEnumerable<Table> SelectedTables() => tableList.SelectedIndices.Cast<int>().Select(i => _visibleTables[i]);
 
-        private IEnumerable<ForeignKey> SelectedForeignKeys() => fkList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as ForeignKey);
+        private IEnumerable<TableKey> SelectedForeignKeys() => fkList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as TableKey);
 
         private ConnectionStringSettings CheckConnectionString()
         {
@@ -231,27 +230,18 @@ namespace SqlGenUI
                 if (table.Columns == null)
                 {
                     table.Columns = da.LoadColumns(table.TableName, table.Schema);
-                    var pks = da.LoadPrimaryKeyColumns(table.TableName, table.Schema);
-                    table.PrimaryKeyColumns = pks.Select(pkc => table.Columns.Single(c => c.ColumnName == pkc.ColumnName)).ToList();
+                    da.PopulatePrimaryKey(table);
                 }
-                table.ForeignKeys = await da.LoadForeignKeys(table.TableName, table.Schema);
-                ReplaceFKColumnsWithTableColumns(table);
+                da.PopulateForeignKeys(table);
             }
-            BeginInvoke((Action<List<ForeignKey>>)PopulateForeignKeyList, table.ForeignKeys);
+            BeginInvoke((Action<Table>)PopulateForeignKeyList, table);
         }
 
-        private void ReplaceFKColumnsWithTableColumns(Table table)
-        {
-            foreach (var fk in table.ForeignKeys)
-            {
-                fk.TableColumns = fk.TableColumns.Select(c => table.Columns.Single(col => string.Equals(col.ColumnName, c.ColumnName, StringComparison.Ordinal))).ToList();
-            }
-        }
-
-        void PopulateForeignKeyList(List<ForeignKey> fks)
+        void PopulateForeignKeyList(Table table)
         {
             fkList.Items.Clear();
-            fkList.Items.AddRange(fks.Select(fk => new ListViewItem { Text = fk.ConstraintName, Tag = fk }).ToArray());
+            fkList.Items.Add(new ListViewItem { Text = table.PrimaryKey.ConstraintName, Tag=table.PrimaryKey });
+            fkList.Items.AddRange(table.ForeignKeys.Select(fk => new ListViewItem { Text = fk.ConstraintName, Tag = fk }).ToArray());
         }
 
         private void addGrantToolStripMenuItem_Click(object sender, EventArgs e)

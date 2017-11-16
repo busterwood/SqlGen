@@ -7,7 +7,7 @@ namespace SqlGen.Generators
 {
     class TableAuditInsertProcGenerator : Generator
     {
-        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT_InsertTable]";
+        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT_InsertTable]";
 
         public override string Generate(Table table)
         {
@@ -29,7 +29,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"    [{table.Schema}].[{table.TableName}] AS target");
             sb.AppendLine("WHERE");
             sb.Append("    EXISTS (SELECT * FROM @recs AS src WHERE ");
-            foreach (var c in table.PrimaryKeyColumns)
+            foreach (var c in table.PrimaryKey)
             {
                 sb.Append($"src.[{c.ColumnName}] = target.[{c.ColumnName}] AND ");
             }
@@ -42,14 +42,14 @@ namespace SqlGen.Generators
         }
 
         // generate audit for details replacement, e.g. replacement of all "order lines" from a FK of "order id"
-        public override string Generate(Table table, ForeignKey fk)
+        public override string Generate(Table table, TableKey fk)
         {
             if (fk == null)
                 return Generate(table);
 
             var sb = new StringBuilder();
             sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
-            foreach (var c in fk.TableColumns)
+            foreach (var c in fk)
             {
                 sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
             }
@@ -62,23 +62,23 @@ namespace SqlGen.Generators
 
             AppendColumnList(table, sb);
             AppendValues(table, sb);
-            sb.AppendLine($"    CASE WHEN recs.[{table.PrimaryKeyColumns.First()}] IS NULL THEN 'D' ELSE 'U' END,,");
+            sb.AppendLine($"    CASE WHEN recs.[{table.PrimaryKey.First()}] IS NULL THEN 'D' ELSE 'U' END,,");
             sb.AppendLine("    GETUTCDATE()");
             sb.AppendLine("FROM");
             sb.AppendLine($"    [{table.Schema}].[{table.TableName}] AS src");
             sb.Append("    LEFT JOIN @recs AS recs ON ");            
-            foreach (var c in table.PrimaryKeyColumns)
+            foreach (var c in table.PrimaryKey)
             {
                 sb.Append($"src.[{c.ColumnName}] = recs.[{c.ColumnName}] AND ");
             }
-            foreach (var c in fk.TableColumns)
+            foreach (var c in fk)
             {
                 sb.Append($"src.[{c.ColumnName}] = recs.[{c.ColumnName}] AND ");
             }
             sb.Length -= 5;
             sb.AppendLine();
             sb.AppendLine("WHERE");
-            foreach (var c in fk.TableColumns)
+            foreach (var c in fk)
             {
                 sb.AppendLine($"    src.[{c.ColumnName}] = @{c.ColumnName} AND");
             }

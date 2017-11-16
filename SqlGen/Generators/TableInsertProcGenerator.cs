@@ -6,7 +6,7 @@ namespace SqlGen.Generators
 {
     class TableInsertProcGenerator : Generator
     {
-        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_InsertTable]";
+        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_InsertTable]";
 
         public override string Generate(Table table)
         {

@@ -7,23 +7,23 @@ namespace SqlGen.Generators
 {
     class GetProcGenerator : Generator
     {
-        public override string ObjectName(Table table, ForeignKey fk = null)
+        public override string ObjectName(Table table, TableKey fk = null)
         {
             if (fk == null)
                 return $"[{table.Schema}].[{table.TableName}_Get]";
 
-            var name = string.Join("And", fk.TableColumns.Select(c => ToTitleCase(c.ColumnName)));
+            var name = string.Join("And", fk.Select(c => ToTitleCase(c.ColumnName)));
             return $"[{table.Schema}].[{table.TableName}_GetBy{name}]";
         }
 
         public override string Generate(Table table) => Generate(table, null);
 
-        public override string Generate(Table table, ForeignKey fk)
+        public override string Generate(Table table, TableKey fk)
         {
             if (fk == null)
-                return GenerateCore(table, ObjectName(table, null), table.PrimaryKeyColumns);
+                return GenerateCore(table, ObjectName(table, null), table.PrimaryKey);
             else
-                return GenerateCore(table, ObjectName(table, fk), fk.TableColumns);
+                return GenerateCore(table, ObjectName(table, fk), fk);
         }
 
         private string GenerateCore(Table table, string procName, IEnumerable<Column> keysColumns)

@@ -189,7 +189,7 @@
             // 
             // columnHeader3
             // 
-            this.columnHeader3.Text = "Foreign Keys";
+            this.columnHeader3.Text = "Keys";
             this.columnHeader3.Width = 205;
             // 
             // tableList

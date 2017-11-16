@@ -6,13 +6,13 @@ namespace SqlGen.Generators
 {
     class AuditInsertProcGenerator : Generator
     {
-        public override string ObjectName(Table table, ForeignKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT_Insert]";
+        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT_Insert]";
 
         public override string Generate(Table table)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
-            foreach (var c in table.PrimaryKeyColumns)
+            foreach (var c in table.PrimaryKey)
             {
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
             }
@@ -41,7 +41,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"FROM");
             sb.AppendLine($"    [{table.Schema}].[{table.TableName}]");
             sb.AppendLine($"WHERE");
-            foreach (var c in table.PrimaryKeyColumns)
+            foreach (var c in table.PrimaryKey)
             {
                 sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName} AND");
             }
