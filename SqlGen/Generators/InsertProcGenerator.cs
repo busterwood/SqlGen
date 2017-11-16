@@ -12,7 +12,7 @@ namespace SqlGen.Generators
         {
             var sb = new StringBuilder();
             sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
-            foreach (var c in table.InsertableColumns)
+            foreach (var c in table.Columns.Where(c => !c.IsIdentity)) // we want a row version parameter, but it is ignored
             {
                 var optional = c.IsAuditColumn() || c.IsSequenceNumber() || c.IsRowVersion() ? " = NULL" : "";
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()}{optional},");

@@ -10,7 +10,7 @@ namespace SqlGen
         public List<Column> Columns { get; set; }
         public List<Column> PrimaryKeyColumns { get; set; }
         public List<ForeignKey> ForeignKeys { get; set; }
-        public IEnumerable<Column> InsertableColumns => Columns.Where(c => !c.IsIdentity);
+        public IEnumerable<Column> InsertableColumns => Columns.Where(c => !c.IsIdentity && !c.IsRowVersion());
         public override string ToString() => $"{Schema}.{TableName}";
     }
 }

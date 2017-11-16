@@ -49,6 +49,9 @@ namespace SqlGen
                 case "nvarchar":
                     var len = c.CharacterMaximumLength == -1 ? max : c.CharacterMaximumLength.ToString();
                     return $"{c.DataType}({len})";
+                case "numeric":
+                case "decimal":
+                    return $"{c.DataType}({c.NumericPrecision},{c.NumericScale})";
                 default:
                     return c.DataType;
             }

@@ -70,7 +70,7 @@ namespace SqlGen.Generators
             sb.AppendLine("WHERE");
             foreach (var c in table.PrimaryKeyColumns)
             {
-                sb.AppendLine($"    [{c.ColumnName}] = {c.ColumnName},");
+                sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName},");
             }
             sb.Length -= 3;
             sb.AppendLine().AppendLine();
