@@ -35,9 +35,8 @@ namespace SqlGen.Generators
             }
 
             var col = keysColumns.First();
-            var tableType = col.DataType.ToUpper() + "_TABLE_TYPE";
             var tableTypeParam = col.ColumnName + "S";
-            sb.AppendLine($"    @{tableTypeParam} {tableType} READONLY");
+            sb.AppendLine($"    @{tableTypeParam} {col.DataType.ToUpper()}_TABLE_TYPE READONLY");
 
             sb.AppendLine("AS");
             sb.AppendLine();
