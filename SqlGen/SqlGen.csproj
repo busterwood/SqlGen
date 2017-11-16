@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Generators\GetListProcGenerator.cs" />
     <Compile Include="Generators\TableAuditInsertProcGenerator.cs" />
     <Compile Include="Generators\TableMergeProcGenerator.cs" />
     <Compile Include="Generators\TableInsertProcGenerator.cs" />
