@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -15,55 +16,26 @@ namespace SqlGen.Generators
             return $"[{table.Schema}].[{table.TableName}_GetBy{name}]";
         }
 
-        public override string Generate(Table table)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
-            foreach (var c in table.PrimaryKeyColumns)
-            {
-                sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
-            }
-            sb.Length -= 3;
-            sb.AppendLine();
-
-            sb.AppendLine("AS");
-            sb.AppendLine();
-
-            sb.AppendLine($"SELECT");
-            foreach (var c in table.Columns)
-            {
-                sb.AppendLine($"    [{c.ColumnName}],");
-            }
-            sb.Length -= 3;
-            sb.AppendLine();
-
-            sb.AppendLine($"FROM");
-            sb.AppendLine($"    [{table.Schema}].[{table.TableName}]");
-            sb.AppendLine($"WHERE");
-            foreach (var c in table.PrimaryKeyColumns)
-            {
-                sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName} AND");
-            }
-            if (table.PrimaryKeyColumns.Any())
-                sb.Length -= 5;
-            sb.AppendLine();
-
-            return sb.ToString();
-        }
+        public override string Generate(Table table) => Generate(table, null);
 
         public override string Generate(Table table, ForeignKey fk)
         {
             if (fk == null)
-                return Generate(table);
+                return GenerateCore(table, ObjectName(table, null), table.PrimaryKeyColumns);
+            else
+                return GenerateCore(table, ObjectName(table, fk), fk.TableColumns);
+        }
 
-            var name = string.Join("And", fk.TableColumns.Select(c => ToTitleCase(c.ColumnName)));
+        private string GenerateCore(Table table, string procName, IEnumerable<Column> keysColumns)
+        {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table, fk)}");
-            foreach (var c in fk.TableColumns)
+            sb.AppendLine($"CREATE PROCEDURE {procName}");
+            foreach (var c in keysColumns)
             {
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
             }
-            sb.Length -= 3;
+            if (keysColumns.Any())
+                sb.Length -= 3;
             sb.AppendLine();
 
             sb.AppendLine("AS");
@@ -80,11 +52,11 @@ namespace SqlGen.Generators
             sb.AppendLine($"FROM");
             sb.AppendLine($"    [{table.Schema}].[{table.TableName}]");
             sb.AppendLine($"WHERE");
-            foreach (var c in fk.TableColumns)
+            foreach (var c in keysColumns)
             {
                 sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName} AND");
             }
-            if (table.PrimaryKeyColumns.Any())
+            if (keysColumns.Any())
                 sb.Length -= 5;
             sb.AppendLine();
 
