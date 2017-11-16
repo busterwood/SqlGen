@@ -212,5 +212,10 @@ namespace SqlGenUI
             var menu = databaseToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>().Single(mi => mi.Checked);
             RefreshFromDb((ConnectionStringSettings)menu.Tag);
         }
+
+        private void codeList_MouseDown(object sender, MouseEventArgs e)
+        {
+            sqlTextBox.DoDragDrop(sqlTextBox.Text, DragDropEffects.Copy);
+        }
     }
 }

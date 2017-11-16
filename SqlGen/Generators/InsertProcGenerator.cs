@@ -12,7 +12,7 @@ namespace SqlGen.Generators
         {
             var sb = new StringBuilder();
             sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
-            foreach (var c in table.InsertableColumns.Where(c => !c.IsSequenceNumber()))
+            foreach (var c in table.InsertableColumns)
             {
                 var optional = c.IsAuditColumn() || c.IsSequenceNumber() ? " = NULL" : "";
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()}{optional},");
@@ -22,13 +22,29 @@ namespace SqlGen.Generators
             sb.AppendLine("AS");
             sb.AppendLine();
             sb.AppendLine($"INSERT INTO [{table.Schema}].[{table.TableName}]");
-            sb.AppendLine("OUTPUT");
-            foreach (var c in table.Columns)
+            AppendColumnList(table, sb);
+            AppendOutput(table, sb);
+            AppendValues(table, sb);
+            return sb.ToString();
+        }
+
+        private static void AppendValues(Table table, StringBuilder sb)
+        {
+            sb.AppendLine("VALUES");
+            sb.AppendLine("(");
+            foreach (var c in table.InsertableColumns)
             {
-                sb.AppendLine($"    INSERTED.[{c.ColumnName}],");
+                if (c.IsSequenceNumber())
+                    sb.AppendLine($"    ISNULL(@{c}, 1),");
+                else
+                    sb.AppendLine($"    {c.ParameterValue()},");
             }
             sb.Length -= 3;
-            sb.AppendLine();
+            sb.AppendLine().AppendLine(")");
+        }
+
+        private static void AppendColumnList(Table table, StringBuilder sb)
+        {
             sb.AppendLine("(");
             foreach (var c in table.InsertableColumns)
             {
@@ -36,19 +52,17 @@ namespace SqlGen.Generators
             }
             sb.Length -= 3;
             sb.AppendLine().AppendLine(")");
-            sb.AppendLine("VALUES");
-            sb.AppendLine("(");
-            foreach (var c in table.InsertableColumns)
+        }
+
+        private static void AppendOutput(Table table, StringBuilder sb)
+        {
+            sb.AppendLine("OUTPUT");
+            foreach (var c in table.Columns)
             {
-                if (c.IsSequenceNumber())
-                    sb.AppendLine($"    1,");
-                else
-                    sb.AppendLine($"    {c.ParameterValue()},");
+                sb.AppendLine($"    INSERTED.[{c.ColumnName}],");
             }
             sb.Length -= 3;
-            sb.AppendLine().AppendLine(")");
-
-            return sb.ToString();
+            sb.AppendLine();
         }
 
         public override string ToString() => "Proc Insert";

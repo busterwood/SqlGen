@@ -149,6 +149,7 @@
             this.codeList.UseCompatibleStateImageBehavior = false;
             this.codeList.View = System.Windows.Forms.View.Details;
             this.codeList.SelectedIndexChanged += new System.EventHandler(this.List_SelectedIndexChanged);
+            this.codeList.MouseDown += new System.Windows.Forms.MouseEventHandler(this.codeList_MouseDown);
             // 
             // columnHeader2
             // 

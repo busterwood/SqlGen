@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 
 namespace SqlGen.Generators
@@ -21,7 +22,8 @@ namespace SqlGen.Generators
             sb.AppendLine();
             sb.AppendLine($"INSERT INTO [{table.Schema}].[{table.TableName}_AUDIT]");
             sb.AppendLine("(");
-            foreach (var c in table.Columns)
+            var insertableColumns = table.Columns.Where(c => !c.IsRowVersion());
+            foreach (var c in insertableColumns)
             {
                 sb.AppendLine($"    [{c.ColumnName}],");
             }
@@ -29,18 +31,19 @@ namespace SqlGen.Generators
             sb.AppendLine($"    [AUDIT_END_DATE]");
             sb.AppendLine(")");
             sb.AppendLine("SELECT");
-            foreach (var c in table.Columns)
+            foreach (var c in insertableColumns)
             {
                 sb.AppendLine($"    [{c.ColumnName}],");
             }
 
             sb.AppendLine($"    @auditType,");
             sb.AppendLine($"    GETUTCDATE()");
-            sb.AppendLine($"FROM [{table.Schema}].[{table.TableName}]");
-            sb.Append($"WHERE ");
+            sb.AppendLine($"FROM");
+            sb.AppendLine($"    [{table.Schema}].[{table.TableName}]");
+            sb.AppendLine($"WHERE");
             foreach (var c in table.PrimaryKeyColumns)
             {
-                sb.Append($"[{c.ColumnName}] = @{c.ColumnName} AND ");
+                sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName} AND");
             }
             sb.Length -= 5;
             sb.AppendLine();

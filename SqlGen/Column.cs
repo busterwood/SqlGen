@@ -54,49 +54,49 @@ namespace SqlGen
             }
         }
 
-        public static string TableValue(this Column c, string alias)
+        public static string TableValue(this Column col, string alias)
         {
-            switch (c.ColumnName.ToUpper())
+            switch (col.ColumnName.ToUpper())
             {
                 case "AUDIT_START_DATE":
                 case "AUDIT_DATE_TIME":
-                    return $"ISNULL({alias}.[{c.ColumnName}], GETUTCDATE())";
+                    return $"ISNULL({alias}.[{col}], GETUTCDATE())";
                 case "AUDIT_UPDATE_USER":
                 case "AUDIT_USER":
-                    return $"ISNULL({alias}.[{c.ColumnName}], dbo.ALL_UserContextGet())";
+                    return $"ISNULL({alias}.[{col}], dbo.ALL_UserContextGet())";
                 case "AUDIT_APPLICATION_NAME":
                 case "AUDIT_APPLICATION":
-                    return $"ISNULL({alias}.[{c.ColumnName}], APP_NAME())";
+                    return $"ISNULL({alias}.[{col}], APP_NAME())";
                 case "AUDIT_MACHINE_NAME":
                 case "AUDIT_MACHINE":
-                    return $"ISNULL({alias}.[{c.ColumnName}], HOST_NAME())";
+                    return $"ISNULL({alias}.[{col}], HOST_NAME())";
                 case "SEQUENCE_NUMBER":
-                    return $"ISNULL({alias}.[{c.ColumnName}], 0) + 1";
+                    return $"ISNULL({alias}.[{col}], 0) + 1";
                 default:
-                    return $"{alias}.[{c.ColumnName}]";
+                    return $"{alias}.[{col}]";
             }
         }
 
-        public static string ParameterValue(this Column c)
+        public static string ParameterValue(this Column col)
         {
-            switch (c.ColumnName.ToUpper())
+            switch (col.ColumnName.ToUpper())
             {
                 case "AUDIT_START_DATE":
                 case "AUDIT_DATE_TIME":
-                    return $"ISNULL(@{c.ColumnName}, GETUTCDATE())";
+                    return $"ISNULL(@{col}, GETUTCDATE())";
                 case "AUDIT_UPDATE_USER":
                 case "AUDIT_USER":
-                    return $"ISNULL(@{c.ColumnName}, dbo.ALL_UserContextGet())";
+                    return $"ISNULL(@{col}, dbo.ALL_UserContextGet())";
                 case "AUDIT_APPLICATION_NAME":
                 case "AUDIT_APPLICATION":
-                    return $"ISNULL(@{c.ColumnName}, APP_NAME())";
+                    return $"ISNULL(@{col}, APP_NAME())";
                 case "AUDIT_MACHINE_NAME":
                 case "AUDIT_MACHINE":
-                    return $"ISNULL(@{c.ColumnName}, HOST_NAME())";
+                    return $"ISNULL(@{col}, HOST_NAME())";
                 case "SEQUENCE_NUMBER":
-                    return $"ISNULL(@{c.ColumnName}, 0) + 1";
+                    return $"ISNULL(@{col}, 0) + 1";
                 default:
-                    return $"@{c.ColumnName}";
+                    return $"@{col}";
             }
         }
 
