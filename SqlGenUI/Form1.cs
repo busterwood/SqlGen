@@ -15,6 +15,11 @@ namespace SqlGenUI
 {
     public partial class Form1 : Form
     {
+        List<Table> _allTables;
+        List<Table> _visibleTables;
+        ListViewItem[] _tableItems;
+        List<Table> _selectedTables;
+
         public Form1()
         {
             InitializeComponent();
@@ -54,6 +59,7 @@ namespace SqlGenUI
         private void RefreshFromDb(ConnectionStringSettings settings)
         {
             tableList.Items.Clear();
+
             RunLoadTablesAsync(settings.ConnectionString);
 
             toolStripStatusLabel1.Text = new SqlConnectionStringBuilder(settings.ConnectionString) { Password = "xxx" }.ToString();                      
@@ -75,14 +81,54 @@ namespace SqlGenUI
             {
                 var da = new TableDataAccess(cnn);
                 var tables = await da.LoadNonAuditTable();
-                BeginInvoke((Action<List<Table>>)SetTablesCombo, tables);
+                BeginInvoke((Action<List<Table>>)PopulateTableList, tables);
             }
         }
 
-        void SetTablesCombo(List<Table> tables)
+        void PopulateTableList(List<Table> tables)
         {
-            tableList.Items.AddRange(tables.Select(t => new ListViewItem { Text=t.ToString(), Tag=t }).ToArray());
-            tableList.Focus();
+            _allTables = tables;
+            var filter = CheckedSchema;
+            var schemas = tables.Select(t => t.Schema).Distinct();
+            schemaToolStripMenuItem.DropDownItems.Clear();
+            schemaToolStripMenuItem.DropDownItems.AddRange(schemas.Select(s => new ToolStripMenuItem(s, null, schema_OnClick) { Checked = s == filter }).ToArray());
+            SetSchemaFilter();
+        }
+
+        private void SetSchemaFilter()
+        {
+            var filter = CheckedSchema;
+
+            if (filter == null)
+                _visibleTables = _allTables;
+            else
+                _visibleTables = _allTables.Where(t => t.Schema == filter).ToList();
+
+            _tableItems = new ListViewItem[_visibleTables.Count];
+            tableList.VirtualListSize = 0;
+            tableList.SelectedIndices.Clear();
+            tableList.Refresh();
+            tableList.VirtualListSize = _visibleTables.Count;
+            tableList.EnsureVisible(0);
+            sqlTextBox.Text = "";
+        }
+
+        void schema_OnClick(object sender, EventArgs args)
+        {
+            CheckedSchema = ((ToolStripMenuItem)sender).Text;
+            SetSchemaFilter();
+        }
+
+        private void tableList_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs args)
+        {
+            var lvi = _tableItems[args.ItemIndex];
+            if (lvi == null)
+            {
+                var t = _visibleTables[args.ItemIndex];
+                lvi = new ListViewItem(t.ToString()) { Tag = t };
+                _tableItems[args.ItemIndex] = lvi;
+            }
+            args.Item = lvi;
         }
 
         private void GenerateSql()
@@ -104,7 +150,7 @@ namespace SqlGenUI
                 {
                     foreach (var gen in SelectedCodeGenerators())
                     {
-                        sb.AppendLine(gen.Generate(table, SelectedForeignKey()));
+                        sb.AppendLine(gen.Generate(table, fk));
                         sb.AppendLine("GO");
                         sb.AppendLine();
                         if (addGrantToolStripMenuItem.Checked)
@@ -132,13 +178,25 @@ namespace SqlGenUI
             }
         }
 
-        private Generator SelectedCodeGenerator() => codeList.SelectedItems.Cast<ListViewItem>().FirstOrDefault()?.Tag as Generator;
-        private IEnumerable<Generator> SelectedCodeGenerators() => codeList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as Generator);
+        string CheckedSchema
+        {
+            get { return schemaToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(mi => mi.Checked)?.Text;  }
+            set
+            {
+                foreach (var mi in schemaToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>())
+                {
+                    mi.Checked = mi.Text == value ? !mi.Checked : false;
+                }
+            }
+        }
 
-        private Table SelectedTable() => tableList.SelectedItems.Cast<ListViewItem>().FirstOrDefault()?.Tag as Table;
-        private IEnumerable<Table> SelectedTables() => tableList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as Table);
+        private IEnumerable<Generator> SelectedCodeGenerators()
+        {
+            return codeList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as Generator);
+        }
 
-        private ForeignKey SelectedForeignKey() => fkList.SelectedItems.Cast<ListViewItem>().FirstOrDefault()?.Tag as ForeignKey;
+        private IEnumerable<Table> SelectedTables() => tableList.SelectedIndices.Cast<int>().Select(i => _visibleTables[i]);
+
         private IEnumerable<ForeignKey> SelectedForeignKeys() => fkList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as ForeignKey);
 
         private ConnectionStringSettings CheckConnectionString()
@@ -155,7 +213,7 @@ namespace SqlGenUI
         private void List_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (sender == tableList)
-                LoadForeignKeysAsync(SelectedTable());
+                LoadForeignKeysAsync(SelectedTables().FirstOrDefault());
             GenerateSql();
         }
 
@@ -216,6 +274,19 @@ namespace SqlGenUI
         private void codeList_MouseDown(object sender, MouseEventArgs e)
         {
             sqlTextBox.DoDragDrop(sqlTextBox.Text, DragDropEffects.Copy);
+        }
+
+        private void tableList_SearchForVirtualItem(object sender, SearchForVirtualItemEventArgs args)
+        {
+            for (int i = args.StartIndex; i < _visibleTables.Count; i++)
+            {
+                var table = _visibleTables[i];
+                if (table.TableName.IndexOf(args.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    args.Index = i;
+                    break;
+                }
+            }
         }
     }
 }

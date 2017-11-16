@@ -33,8 +33,10 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.databaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.schemaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addGrantToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.codeList = new System.Windows.Forms.ListView();
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -42,7 +44,6 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableList = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -83,6 +84,7 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.databaseToolStripMenuItem,
+            this.schemaToolStripMenuItem,
             this.optionsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -95,6 +97,12 @@
             this.databaseToolStripMenuItem.Name = "databaseToolStripMenuItem";
             this.databaseToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
             this.databaseToolStripMenuItem.Text = "Database";
+            // 
+            // schemaToolStripMenuItem
+            // 
+            this.schemaToolStripMenuItem.Name = "schemaToolStripMenuItem";
+            this.schemaToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.schemaToolStripMenuItem.Text = "Schema";
             // 
             // optionsToolStripMenuItem
             // 
@@ -110,9 +118,17 @@
             this.addGrantToolStripMenuItem.Checked = true;
             this.addGrantToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.addGrantToolStripMenuItem.Name = "addGrantToolStripMenuItem";
-            this.addGrantToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.addGrantToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.addGrantToolStripMenuItem.Text = "Add Grant";
             this.addGrantToolStripMenuItem.Click += new System.EventHandler(this.addGrantToolStripMenuItem_Click);
+            // 
+            // refreshToolStripMenuItem
+            // 
+            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
+            this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.refreshToolStripMenuItem.Text = "Refresh";
+            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
             // tableLayoutPanel1
             // 
@@ -189,20 +205,15 @@
             this.tableList.TabIndex = 9;
             this.tableList.UseCompatibleStateImageBehavior = false;
             this.tableList.View = System.Windows.Forms.View.Details;
+            this.tableList.VirtualMode = true;
+            this.tableList.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.tableList_RetrieveVirtualItem);
+            this.tableList.SearchForVirtualItem += new System.Windows.Forms.SearchForVirtualItemEventHandler(this.tableList_SearchForVirtualItem);
             this.tableList.SelectedIndexChanged += new System.EventHandler(this.List_SelectedIndexChanged);
             // 
             // columnHeader1
             // 
             this.columnHeader1.Text = "Tables / Views";
             this.columnHeader1.Width = 205;
-            // 
-            // refreshToolStripMenuItem
-            // 
-            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
-            this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.refreshToolStripMenuItem.Text = "Refresh";
-            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -242,6 +253,7 @@
         private System.Windows.Forms.ListView tableList;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ToolStripMenuItem refreshToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem schemaToolStripMenuItem;
     }
 }
 

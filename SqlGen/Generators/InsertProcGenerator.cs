@@ -14,7 +14,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             foreach (var c in table.InsertableColumns)
             {
-                var optional = c.IsAuditColumn() || c.IsSequenceNumber() ? " = NULL" : "";
+                var optional = c.IsAuditColumn() || c.IsSequenceNumber() || c.IsRowVersion() ? " = NULL" : "";
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()}{optional},");
             }
             sb.Length -= 3;
