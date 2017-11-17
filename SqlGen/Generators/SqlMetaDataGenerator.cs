@@ -11,6 +11,7 @@ namespace SqlGen
             var varName = (table.TableName + "_TABLE_TYPE").ToPascalCase() + "Schema =";
             sb.AppendLine($"\t\tstatic readonly SqlMetaData[] {varName}");
             sb.AppendLine("\t\t{");
+            sb.AppendLine("\t\t\tnew SqlMetaData(\"BULK_SEQ\", SqlDbType.Int),");
             foreach (var c in table.Columns.Where(c => !c.IsRowVersion()))
             {                
                 sb.AppendLine($"\t\t\tnew SqlMetaData(\"{c}\", SqlDbType.{TypeAndLength(c)}),");
@@ -42,9 +43,8 @@ namespace SqlGen
                 case "nvarchar":
                     return $"NVarChar, {c.CharacterMaximumLength}";
                 case "decimal":
-                    return $"Decimal, {c.NumericPrecision}, {c.NumericScale}";
                 case "numeric":
-                    return $"Numeric, {c.NumericPrecision}, {c.NumericScale}";
+                    return $"Decimal, {c.NumericPrecision}, {c.NumericScale}";
                 case "datetime":
                     return $"DateTime";
                 case "datetimeoffset":
