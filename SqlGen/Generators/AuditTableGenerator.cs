@@ -2,7 +2,7 @@
 using System.Text;
 namespace SqlGen
 {
-    public class AuditTableGenerator : Generator
+    public class AuditTableGenerator : SqlGenerator
     {
         public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT]";
 

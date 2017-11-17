@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SqlGen.Generators
 {
-    class TableTypeGenerator : Generator
+    class TableTypeGenerator : SqlGenerator
     {
         public override string ObjectName(Table table, TableKey fk = null)
         {

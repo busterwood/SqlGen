@@ -35,21 +35,29 @@ namespace SqlGen
                     foreach (var gen in generators)
                     {
                         sb.AppendLine(gen.Generate(table, key));
-                        sb.Append(gen.BatchSeparator());
-                        if (Grant)
-                        {
-                            var grantSql = gen.Grant(table, key);
-                            if (grantSql != null)
-                            {
-                                sb.AppendLine(grantSql);
-                                sb.Append(gen.BatchSeparator());
-                            }
-                        }
+                        SqlSpecificGenerate(sb, table, key, gen as SqlGenerator);
                     }
                 }
             }
 
             return sb.ToString();
+        }
+
+        private void SqlSpecificGenerate(StringBuilder sb, Table table, TableKey key, SqlGenerator sqlGen)
+        {
+            if (sqlGen == null)
+                return;
+
+            sb.Append(sqlGen.BatchSeparator());
+            if (Grant)
+            {
+                var grantSql = sqlGen.Grant(table, key);
+                if (grantSql != null)
+                {
+                    sb.AppendLine(grantSql);
+                    sb.Append(sqlGen.BatchSeparator());
+                }
+            }
         }
 
         private void LoadColumnsAndPrimaryKey(Table table)

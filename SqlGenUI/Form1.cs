@@ -30,6 +30,8 @@ namespace SqlGenUI
 
             ResizeListHeaders();
 
+            RefreshCodeGenerators();
+
             RefreshFromDb(ConfigurationManager.ConnectionStrings["local"]);
         }
 
@@ -56,13 +58,16 @@ namespace SqlGenUI
 
             RunLoadTablesAsync(settings.ConnectionString);
 
-            toolStripStatusLabel1.Text = new SqlConnectionStringBuilder(settings.ConnectionString) { Password = "xxx" }.ToString();                      
+            toolStripStatusLabel1.Text = new SqlConnectionStringBuilder(settings.ConnectionString) { Password = "xxx" }.ToString();
+        }
 
+        private void RefreshCodeGenerators()
+        {
             var generators = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(asm => asm.GetTypes())
                 .Where(t => !t.IsAbstract && typeof(Generator).IsAssignableFrom(t))
                 .Select(t => Activator.CreateInstance(t))
-                .Select(gen => new ListViewItem { Text=gen.ToString(), Tag=gen })
+                .Select(gen => new ListViewItem { Text = gen.ToString(), Tag = gen })
                 .OrderBy(lvi => lvi.Text);
 
             codeList.Items.Clear();

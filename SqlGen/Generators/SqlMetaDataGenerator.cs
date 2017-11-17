@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 
 namespace SqlGen
@@ -58,17 +57,6 @@ namespace SqlGen
                     return c.DataType.ToPascalCase();
             }            
         }
-
-
-
-        public override string GrantType() => null;
-
-        public override string ObjectName(Table table, TableKey fk = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string BatchSeparator() => "";
 
         public override string ToString() => "C# SqlMetaData";
     }

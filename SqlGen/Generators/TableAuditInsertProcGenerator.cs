@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SqlGen.Generators
 {
-    class TableAuditInsertProcGenerator : Generator
+    class TableAuditInsertProcGenerator : SqlGenerator
     {
         public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT_InsertTable]";
 

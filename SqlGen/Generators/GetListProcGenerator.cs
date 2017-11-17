@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SqlGen.Generators
 {
-    class GetListProcGenerator : Generator
+    class GetListProcGenerator : SqlGenerator
     {
         public override string ObjectName(Table table, TableKey fk = null)
         {

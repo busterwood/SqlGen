@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SqlGen.Generators
 {
-    class TableInsertProcGenerator : Generator
+    class TableInsertProcGenerator : SqlGenerator
     {
         public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_InsertTable]";
 

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace SqlGen.Generators
 {
-    class UpdateGenerator : Generator
+    class UpdateGenerator : SqlGenerator
     {
         public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}]";
         public override string Generate(Table table)

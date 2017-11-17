@@ -4,11 +4,16 @@ namespace SqlGen
 {
     public abstract class Generator
     {
-        public abstract string ObjectName(Table table, TableKey fk = null);
-
-        public virtual string Generate(Table table, TableKey fk = null) => Generate(table);
+        public virtual string Generate(Table table, TableKey fk) => Generate(table);
 
         public abstract string Generate(Table table);
+
+        public abstract override string ToString();
+    }
+
+    public abstract class SqlGenerator : Generator
+    {
+        public abstract string ObjectName(Table table, TableKey fk = null);
 
         public virtual string GrantType() => "OBJECT";
 
@@ -21,7 +26,6 @@ namespace SqlGen
                 return null;
             return $@"GRANT EXECUTE ON {GrantType()}::{ObjectName(table, fk)} TO [db_execproc];";
         }
-
-        public abstract override string ToString();
     }
+
 }

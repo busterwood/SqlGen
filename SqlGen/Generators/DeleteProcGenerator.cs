@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SqlGen.Generators
 {
-    class DeleteProcGenerator : Generator
+    class DeleteProcGenerator : SqlGenerator
     {
 
         public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_Delete]";
