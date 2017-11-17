@@ -26,12 +26,12 @@ namespace SqlGen.Generators
             sb.AppendLine("    @auditType,");
             sb.AppendLine("    GETUTCDATE()");
             sb.AppendLine("FROM");
-            sb.AppendLine($"    [{table.Schema}].[{table.TableName}] AS target");
+            sb.AppendLine($"    [{table.Schema}].[{table.TableName}] AS src");
             sb.AppendLine("WHERE");
-            sb.Append("    EXISTS (SELECT * FROM @recs AS src WHERE ");
+            sb.Append("    EXISTS (SELECT * FROM @recs AS recs WHERE ");
             foreach (var c in table.PrimaryKey)
             {
-                sb.Append($"src.[{c.ColumnName}] = target.[{c.ColumnName}] AND ");
+                sb.Append($"src.[{c.ColumnName}] = recs.[{c.ColumnName}] AND ");
             }
             sb.Length -= 5;
             sb.AppendLine(")");
@@ -63,7 +63,7 @@ namespace SqlGen.Generators
 
             AppendColumnList(table, sb);
             AppendValues(table, sb);
-            sb.AppendLine($"    CASE WHEN recs.[{table.PrimaryKey.First()}] IS NULL THEN 'D' ELSE 'U' END,,");
+            sb.AppendLine($"    CASE WHEN recs.[{table.PrimaryKey.First()}] IS NULL THEN 'D' ELSE 'U' END,");
             sb.AppendLine("    GETUTCDATE()");
             sb.AppendLine("FROM");
             sb.AppendLine($"    [{table.Schema}].[{table.TableName}] AS src");
@@ -96,7 +96,7 @@ namespace SqlGen.Generators
             sb.AppendLine("SELECT");
             foreach (var c in table.Columns.Where(c => !c.IsRowVersion()))
             {
-                sb.AppendLine($"    [{c.ColumnName}],");
+                sb.AppendLine($"    src.[{c.ColumnName}],");
             }
         }
 

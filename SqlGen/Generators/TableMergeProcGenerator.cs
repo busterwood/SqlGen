@@ -108,7 +108,10 @@ namespace SqlGen.Generators
         {
             foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
             {
-                sb.AppendLine($"    [{c.ColumnName}] = {c.TableValue("src")},");
+                if (c.IsSequenceNumber())
+                    sb.AppendLine($"    [{c.ColumnName}] = target.{c.ColumnName} + 1,");
+                else
+                    sb.AppendLine($"    [{c.ColumnName}] = {c.TableValue("src")},");
             }
             sb.Length -= 3;
             sb.AppendLine();
