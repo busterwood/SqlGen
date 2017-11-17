@@ -47,6 +47,7 @@
     <Compile Include="Generators\GetListProcGenerator.cs" />
     <Compile Include="Generators\InsertGenerator.cs" />
     <Compile Include="Generators\MultiGenerator.cs" />
+    <Compile Include="Generators\SqlMetaDataGenerator.cs" />
     <Compile Include="Generators\TableAuditInsertProcGenerator.cs" />
     <Compile Include="Generators\TableMergeProcGenerator.cs" />
     <Compile Include="Generators\TableInsertProcGenerator.cs" />

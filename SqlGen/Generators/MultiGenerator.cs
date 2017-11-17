@@ -35,16 +35,14 @@ namespace SqlGen
                     foreach (var gen in generators)
                     {
                         sb.AppendLine(gen.Generate(table, key));
-                        sb.AppendLine("GO");
-                        sb.AppendLine();
+                        sb.Append(gen.BatchSeparator());
                         if (Grant)
                         {
                             var grantSql = gen.Grant(table, key);
                             if (grantSql != null)
                             {
                                 sb.AppendLine(grantSql);
-                                sb.AppendLine("GO");
-                                sb.AppendLine();
+                                sb.Append(gen.BatchSeparator());
                             }
                         }
                     }

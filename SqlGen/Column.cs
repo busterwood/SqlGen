@@ -43,6 +43,8 @@ namespace SqlGen
             const string max = "max";
             switch (c.DataType.ToLower())
             {
+                case "binary":
+                case "varbinary":
                 case "char":
                 case "nchar":
                 case "varchar":

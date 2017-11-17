@@ -1,4 +1,6 @@
-﻿namespace SqlGen
+﻿using System;
+
+namespace SqlGen
 {
     public abstract class Generator
     {
@@ -10,6 +12,8 @@
 
         public virtual string GrantType() => "OBJECT";
 
+        public virtual string BatchSeparator() => "GO" + Environment.NewLine + Environment.NewLine;
+
         public virtual string Grant(Table table, TableKey fk = null)
         {
             var gt = GrantType();
@@ -20,5 +24,4 @@
 
         public abstract override string ToString();
     }
-    
 }
