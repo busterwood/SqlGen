@@ -205,9 +205,6 @@
             this.tableList.TabIndex = 9;
             this.tableList.UseCompatibleStateImageBehavior = false;
             this.tableList.View = System.Windows.Forms.View.Details;
-            this.tableList.VirtualMode = true;
-            this.tableList.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.tableList_RetrieveVirtualItem);
-            this.tableList.SearchForVirtualItem += new System.Windows.Forms.SearchForVirtualItemEventHandler(this.tableList_SearchForVirtualItem);
             this.tableList.SelectedIndexChanged += new System.EventHandler(this.List_SelectedIndexChanged);
             // 
             // columnHeader1

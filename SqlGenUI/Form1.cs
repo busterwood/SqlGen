@@ -1,13 +1,10 @@
 ﻿using SqlGen;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -16,9 +13,6 @@ namespace SqlGenUI
     public partial class Form1 : Form
     {
         List<Table> _allTables;
-        List<Table> _visibleTables;
-        ListViewItem[] _tableItems;
-        List<Table> _selectedTables;
 
         public Form1()
         {
@@ -77,6 +71,9 @@ namespace SqlGenUI
 
         async Task RunLoadTablesAsync(string connectionString)
         {
+            Cursor = Cursors.AppStarting;
+            Task.Yield();
+
             using (var cnn = new SqlConnection(connectionString))
             {
                 var da = new TableDataAccess(cnn);
@@ -92,88 +89,37 @@ namespace SqlGenUI
             var schemas = tables.Select(t => t.Schema).Distinct();
             schemaToolStripMenuItem.DropDownItems.Clear();
             schemaToolStripMenuItem.DropDownItems.AddRange(schemas.Select(s => new ToolStripMenuItem(s, null, schema_OnClick) { Checked = s == filter }).ToArray());
-            SetSchemaFilter();
+            PopulateTableList();
+            sqlTextBox.Text = "";
+            Cursor = Cursors.Default;
         }
 
-        private void SetSchemaFilter()
+        private void PopulateTableList()
         {
-            var filter = CheckedSchema;
-
-            if (filter == null)
-                _visibleTables = _allTables;
-            else
-                _visibleTables = _allTables.Where(t => t.Schema == filter).ToList();
-
-            _tableItems = new ListViewItem[_visibleTables.Count];
-            tableList.VirtualListSize = 0;
-            tableList.SelectedIndices.Clear();
-            tableList.Refresh();
-            tableList.VirtualListSize = _visibleTables.Count;
+            var visible = CheckedSchema == null ? _allTables : _allTables.Where(t => t.Schema == CheckedSchema);
+            tableList.Items.Clear();
+            tableList.Items.AddRange(visible.Select(t => new ListViewItem(t.ToString()) { Tag = t }).ToArray());
             tableList.EnsureVisible(0);
-            sqlTextBox.Text = "";
         }
 
         void schema_OnClick(object sender, EventArgs args)
         {
             CheckedSchema = ((ToolStripMenuItem)sender).Text;
-            SetSchemaFilter();
-        }
-
-        private void tableList_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs args)
-        {
-            var lvi = _tableItems[args.ItemIndex];
-            if (lvi == null)
-            {
-                var t = _visibleTables[args.ItemIndex];
-                lvi = new ListViewItem(t.ToString()) { Tag = t };
-                _tableItems[args.ItemIndex] = lvi;
-            }
-            args.Item = lvi;
+            PopulateTableList();
         }
 
         private void GenerateSql()
         {
             sqlTextBox.Text = "";
-
-            var sb = new StringBuilder();
-
-            var fks = SelectedForeignKeys().ToList();
-            if (fks.Count == 0)
-                fks.Add(null);
-
-            foreach (var table in SelectedTables())
+            Cursor = Cursors.AppStarting;
+            try
             {
-                if (table.Columns == null)
-                    LoadColumnsAndPrimaryKey(table);
-
-                foreach (var fk in fks)
-                {
-                    foreach (var gen in SelectedCodeGenerators())
-                    {
-                        sb.AppendLine(gen.Generate(table, fk));
-                        sb.AppendLine("GO");
-                        sb.AppendLine();
-                        if (addGrantToolStripMenuItem.Checked)
-                        {
-                            sb.AppendLine(gen.Grant(table, fk));
-                            sb.AppendLine("GO");
-                            sb.AppendLine();
-                        }
-                    }
-                }
+                var gen = new MultiGenerator(CheckConnectionString().ConnectionString) { Grant = addGrantToolStripMenuItem.Checked };
+                sqlTextBox.Text = gen.Generate(SelectedTables(), SelectedKeys(), SelectedCodeGenerators());
             }
-
-            sqlTextBox.Text = sb.ToString();
-        }
-
-        private void LoadColumnsAndPrimaryKey(Table table)
-        {
-            ConnectionStringSettings connectionSettings = CheckConnectionString();
-            using (var cnn = new SqlConnection(connectionSettings.ConnectionString))
+            finally
             {
-                var da = new TableDataAccess(cnn);
-                table.Columns = da.LoadColumns(table.TableName, table.Schema);
-                da.PopulatePrimaryKey(table);
+                Cursor = Cursors.Default;
             }
         }
 
@@ -189,14 +135,11 @@ namespace SqlGenUI
             }
         }
 
-        private IEnumerable<Generator> SelectedCodeGenerators()
-        {
-            return codeList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as Generator);
-        }
+        private IEnumerable<Generator> SelectedCodeGenerators() => codeList.SelectedItems.Cast<ListViewItem>().Select(lvi => (Generator)lvi.Tag);
 
-        private IEnumerable<Table> SelectedTables() => tableList.SelectedIndices.Cast<int>().Select(i => _visibleTables[i]);
+        private IEnumerable<Table> SelectedTables() => tableList.SelectedItems.Cast<ListViewItem>().Select(lvi => (Table)lvi.Tag);
 
-        private IEnumerable<TableKey> SelectedForeignKeys() => fkList.SelectedItems.Cast<ListViewItem>().Select(lvi => lvi.Tag as TableKey);
+        private IEnumerable<TableKey> SelectedKeys() => fkList.SelectedItems.Cast<ListViewItem>().Select(lvi => (TableKey)lvi.Tag);
 
         private ConnectionStringSettings CheckConnectionString()
         {
@@ -218,22 +161,14 @@ namespace SqlGenUI
 
         private async Task LoadForeignKeysAsync(Table table)
         {
+            Cursor = Cursors.AppStarting;
             fkList.Items.Clear();
             if (table == null)
                 return;
 
             await Task.Yield();
             ConnectionStringSettings connectionSettings = CheckConnectionString();
-            using (var cnn = new SqlConnection(connectionSettings.ConnectionString))
-            {
-                var da = new TableDataAccess(cnn);
-                if (table.Columns == null)
-                {
-                    table.Columns = da.LoadColumns(table.TableName, table.Schema);
-                    da.PopulatePrimaryKey(table);
-                }
-                da.PopulateForeignKeys(table);
-            }
+            table.EnsureFullyPopulated(connectionSettings.ConnectionString);
             BeginInvoke((Action<Table>)PopulateForeignKeyList, table);
         }
 
@@ -242,6 +177,7 @@ namespace SqlGenUI
             fkList.Items.Clear();
             fkList.Items.Add(new ListViewItem { Text = table.PrimaryKey.ConstraintName, Tag=table.PrimaryKey });
             fkList.Items.AddRange(table.ForeignKeys.Select(fk => new ListViewItem { Text = fk.ConstraintName, Tag = fk }).ToArray());
+            Cursor = Cursors.Default;
         }
 
         private void addGrantToolStripMenuItem_Click(object sender, EventArgs e)
@@ -264,19 +200,6 @@ namespace SqlGenUI
         private void codeList_MouseDown(object sender, MouseEventArgs e)
         {
             sqlTextBox.DoDragDrop(sqlTextBox.Text, DragDropEffects.Copy);
-        }
-
-        private void tableList_SearchForVirtualItem(object sender, SearchForVirtualItemEventArgs args)
-        {
-            for (int i = args.StartIndex; i < _visibleTables.Count; i++)
-            {
-                var table = _visibleTables[i];
-                if (table.TableName.IndexOf(args.Text, StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    args.Index = i;
-                    break;
-                }
-            }
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SqlGen.Generators
 {
-    class InsertProcGenerator : Generator
+    class InsertProcGenerator : InsertGenerator
     {
         public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_Insert]";
 
@@ -21,50 +21,13 @@ namespace SqlGen.Generators
             sb.AppendLine();
             sb.AppendLine("AS");
             sb.AppendLine();
-            sb.AppendLine($"INSERT INTO [{table.Schema}].[{table.TableName}]");
-            AppendColumnList(table, sb);
-            AppendOutput(table, sb);
-            AppendValues(table, sb);
+            sb.Append(base.Generate(table));
             return sb.ToString();
         }
 
-        private static void AppendValues(Table table, StringBuilder sb)
-        {
-            sb.AppendLine("VALUES");
-            sb.AppendLine("(");
-            foreach (var c in table.InsertableColumns)
-            {
-                if (c.IsSequenceNumber())
-                    sb.AppendLine($"    ISNULL(@{c}, 1),");
-                else
-                    sb.AppendLine($"    {c.ParameterValue()},");
-            }
-            sb.Length -= 3;
-            sb.AppendLine().AppendLine(")");
-        }
-
-        private static void AppendColumnList(Table table, StringBuilder sb)
-        {
-            sb.AppendLine("(");
-            foreach (var c in table.InsertableColumns)
-            {
-                sb.AppendLine($"    [{c.ColumnName}],");
-            }
-            sb.Length -= 3;
-            sb.AppendLine().AppendLine(")");
-        }
-
-        private static void AppendOutput(Table table, StringBuilder sb)
-        {
-            sb.AppendLine("OUTPUT");
-            foreach (var c in table.Columns)
-            {
-                sb.AppendLine($"    INSERTED.[{c.ColumnName}],");
-            }
-            sb.Length -= 3;
-            sb.AppendLine();
-        }
+        public override string GrantType() => "OBJECT";
 
         public override string ToString() => "Proc Insert";
+
     }
 }

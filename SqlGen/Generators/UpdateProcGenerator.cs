@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SqlGen.Generators
 {
-    class UpdateProcGenerator : Generator
+    class UpdateProcGenerator : UpdateGenerator
     {
         public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_Update]";
 
@@ -14,7 +14,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
             foreach (var c in table.Columns)
             {
-                var optional = c.IsAuditColumn() || c.IsSequenceNumber() || c.IsRowVersion()  ? " = NULL" : "";
+                var optional = c.IsAuditColumn() || c.IsSequenceNumber() || c.IsRowVersion() ? " = NULL" : "";
                 sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()}{optional},");
             }
             sb.Length -= 3;
@@ -22,10 +22,7 @@ namespace SqlGen.Generators
             sb.AppendLine("AS");
             AppendExecAuditProc(table, sb);
             sb.AppendLine();
-            sb.AppendLine($"UPDATE [{table.Schema}].[{table.TableName}]");
-            AppendSet(table, sb);
-            AppendOutput(table, sb);
-            AppendWhere(table, sb);
+            sb.Append(base.Generate(table));
             return sb.ToString();
         }
 
@@ -40,41 +37,7 @@ namespace SqlGen.Generators
             sb.AppendLine(" 'U'"); // type = update
         }
 
-        private static void AppendSet(Table table, StringBuilder sb)
-        {
-            sb.AppendLine("SET");
-            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
-            {
-                if (c.IsSequenceNumber())
-                    sb.AppendLine($"    [{c.ColumnName}] = [{c.ColumnName}] + 1,");
-                else
-                    sb.AppendLine($"    [{c.ColumnName}] = {c.ParameterValue()},");
-            }
-            sb.Length -= 3;
-            sb.AppendLine();
-        }
-
-        private static void AppendOutput(Table table, StringBuilder sb)
-        {
-            sb.AppendLine("OUTPUT");
-            foreach (var c in table.Columns)
-            {
-                sb.AppendLine($"    INSERTED.[{c.ColumnName}],");
-            }
-            sb.Length -= 3;
-            sb.AppendLine();
-        }
-
-        private static void AppendWhere(Table table, StringBuilder sb)
-        {
-            sb.AppendLine("WHERE");
-            foreach (var c in table.PrimaryKey)
-            {
-                sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName},");
-            }
-            sb.Length -= 3;
-            sb.AppendLine().AppendLine();
-        }
+        public override string GrantType() => "OBJECT";
 
         public override string ToString() => "Proc Update";
     }

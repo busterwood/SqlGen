@@ -45,6 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Generators\GetListProcGenerator.cs" />
+    <Compile Include="Generators\InsertGenerator.cs" />
+    <Compile Include="Generators\MultiGenerator.cs" />
     <Compile Include="Generators\TableAuditInsertProcGenerator.cs" />
     <Compile Include="Generators\TableMergeProcGenerator.cs" />
     <Compile Include="Generators\TableInsertProcGenerator.cs" />
@@ -53,6 +55,7 @@
     <Compile Include="Generators\GetProcGenerator.cs" />
     <Compile Include="Generators\DeleteProcGenerator.cs" />
     <Compile Include="Generators\TableUpdateProcGenerator .cs" />
+    <Compile Include="Generators\UpdateGenerator.cs" />
     <Compile Include="Generators\UpdateProcGenerator.cs" />
     <Compile Include="Generators\InsertProcGenerator.cs" />
     <Compile Include="Generators\AuditTableGenerator.cs" />
