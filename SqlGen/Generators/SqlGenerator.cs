@@ -10,7 +10,7 @@ namespace SqlGen
         public virtual string BatchSeparator() => "GO" + Environment.NewLine + Environment.NewLine;
         public virtual string Grant(Table table, TableKey fk = null)
         {
-            return $@"GRANT EXECUTE ON {GrantType()}::{ObjectName(table, fk)} TO [db_execproc];";
+            return $@"GRANT EXECUTE ON {GrantType()}::{ObjectName(table, fk)} TO [db_execproc] AS [dbo];";
         }
 
         protected void AppendCreateOrAlterProc(Table table, TableKey key, bool alter, StringBuilder sb)
