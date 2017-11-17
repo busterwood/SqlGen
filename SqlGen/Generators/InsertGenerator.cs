@@ -6,9 +6,9 @@ namespace SqlGen.Generators
 {
     class InsertGenerator : SqlGenerator
     {
-        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_Insert]";
+        public override string ObjectName(Table table, TableKey key = null) => $"[{table.Schema}].[{table.TableName}_Insert]";
 
-        public override string Generate(Table table)
+        public override string Generate(Table table, TableKey key, bool alter)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"INSERT INTO [{table.Schema}].[{table.TableName}]");

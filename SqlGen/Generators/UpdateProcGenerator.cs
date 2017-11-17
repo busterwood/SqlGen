@@ -6,12 +6,12 @@ namespace SqlGen.Generators
 {
     class UpdateProcGenerator : UpdateGenerator
     {
-        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_Update]";
+        public override string ObjectName(Table table, TableKey key = null) => $"[{table.Schema}].[{table.TableName}_Update]";
 
-        public override string Generate(Table table)
+        public override string Generate(Table table, TableKey key, bool alter)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
+            AppendCreateOrAlterProc(table, key, alter, sb);
             foreach (var c in table.Columns)
             {
                 var optional = c.IsAuditColumn() || c.IsSequenceNumber() || c.IsRowVersion() ? " = NULL" : "";
@@ -22,7 +22,7 @@ namespace SqlGen.Generators
             sb.AppendLine("AS");
             AppendExecAuditProc(table, sb);
             sb.AppendLine();
-            sb.Append(base.Generate(table));
+            sb.Append(base.Generate(table, key, alter));
             return sb.ToString();
         }
 

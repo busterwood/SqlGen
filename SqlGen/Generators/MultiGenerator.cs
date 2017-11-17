@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SqlGen
 {
@@ -13,6 +11,7 @@ namespace SqlGen
         readonly string connectionString;
 
         public bool Grant { get; set; }
+        public bool Alter { get; set; }
 
         public MultiGenerator(string connectionString)
         {
@@ -34,8 +33,11 @@ namespace SqlGen
                 {
                     foreach (var gen in generators)
                     {
-                        sb.AppendLine(gen.Generate(table, key));
-                        SqlSpecificGenerate(sb, table, key, gen as SqlGenerator);
+                        var sqlGen = gen as SqlGenerator;
+                        if (sqlGen != null)
+                           GenerateSql(sb, table, key, gen as SqlGenerator);
+                        else
+                            sb.AppendLine(gen.Generate(table, key));
                     }
                 }
             }
@@ -43,19 +45,18 @@ namespace SqlGen
             return sb.ToString();
         }
 
-        private void SqlSpecificGenerate(StringBuilder sb, Table table, TableKey key, SqlGenerator sqlGen)
+        private void GenerateSql(StringBuilder sb, Table table, TableKey key, SqlGenerator gen)
         {
-            if (sqlGen == null)
-                return;
+            sb.AppendLine(gen.Generate(table, key, Alter));
+            sb.Append(gen.BatchSeparator());
 
-            sb.Append(sqlGen.BatchSeparator());
             if (Grant)
             {
-                var grantSql = sqlGen.Grant(table, key);
+                var grantSql = gen.Grant(table, key);
                 if (grantSql != null)
                 {
                     sb.AppendLine(grantSql);
-                    sb.Append(sqlGen.BatchSeparator());
+                    sb.Append(gen.BatchSeparator());
                 }
             }
         }

@@ -15,20 +15,18 @@ namespace SqlGen.Generators
             return $"[{table.Schema}].[{table.TableName}_GetByListOf{name}]";
         }
 
-        public override string Generate(Table table) => Generate(table, null);
-
-        public override string Generate(Table table, TableKey fk)
+        public override string Generate(Table table, TableKey key, bool alter)
         {
-            if (fk == null)
-                return GenerateCore(table, ObjectName(table, null), table.PrimaryKey);
+            if (key == null)
+                return GenerateCore(table, ObjectName(table, null), alter, table.PrimaryKey);
             else
-                return GenerateCore(table, ObjectName(table, fk), fk);
+                return GenerateCore(table, ObjectName(table, key), alter, key);
         }
 
-        private string GenerateCore(Table table, string procName, IEnumerable<Column> keysColumns)
+        private string GenerateCore(Table table, string procName, bool alter, IEnumerable<Column> keysColumns)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE {procName}");
+            AppendCreateOrAlterProc(procName, alter, sb);
             if (keysColumns.Count() != 1)
             {
                 throw new NotSupportedException("Multiple key column parameters are not supported");

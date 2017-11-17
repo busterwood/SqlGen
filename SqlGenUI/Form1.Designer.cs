@@ -44,6 +44,7 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableList = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.alterStoredProcsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -108,6 +109,7 @@
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addGrantToolStripMenuItem,
+            this.alterStoredProcsToolStripMenuItem,
             this.refreshToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
@@ -118,7 +120,7 @@
             this.addGrantToolStripMenuItem.Checked = true;
             this.addGrantToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.addGrantToolStripMenuItem.Name = "addGrantToolStripMenuItem";
-            this.addGrantToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.addGrantToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
             this.addGrantToolStripMenuItem.Text = "Add Grant";
             this.addGrantToolStripMenuItem.Click += new System.EventHandler(this.addGrantToolStripMenuItem_Click);
             // 
@@ -126,7 +128,7 @@
             // 
             this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
             this.refreshToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
             this.refreshToolStripMenuItem.Text = "Refresh";
             this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
@@ -212,6 +214,13 @@
             this.columnHeader1.Text = "Tables / Views";
             this.columnHeader1.Width = 205;
             // 
+            // aLTERStoredProcsToolStripMenuItem
+            // 
+            this.alterStoredProcsToolStripMenuItem.Name = "aLTERStoredProcsToolStripMenuItem";
+            this.alterStoredProcsToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.alterStoredProcsToolStripMenuItem.Text = "ALTER stored procs";
+            this.alterStoredProcsToolStripMenuItem.Click += new System.EventHandler(this.alterStoredProcsToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -251,6 +260,7 @@
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ToolStripMenuItem refreshToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem schemaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem alterStoredProcsToolStripMenuItem;
     }
 }
 

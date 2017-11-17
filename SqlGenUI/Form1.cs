@@ -29,9 +29,7 @@ namespace SqlGenUI
             );
 
             ResizeListHeaders();
-
             RefreshCodeGenerators();
-
             RefreshFromDb(ConfigurationManager.ConnectionStrings["local"]);
         }
 
@@ -63,6 +61,8 @@ namespace SqlGenUI
 
         private void RefreshCodeGenerators()
         {
+            GC.KeepAlive(typeof(Generator));
+
             var generators = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(asm => asm.GetTypes())
                 .Where(t => !t.IsAbstract && typeof(Generator).IsAssignableFrom(t))
@@ -119,7 +119,11 @@ namespace SqlGenUI
             Cursor = Cursors.AppStarting;
             try
             {
-                var gen = new MultiGenerator(CheckConnectionString().ConnectionString) { Grant = addGrantToolStripMenuItem.Checked };
+                var gen = new MultiGenerator(CheckConnectionString().ConnectionString)
+                {
+                    Alter = alterStoredProcsToolStripMenuItem.Checked,
+                    Grant = addGrantToolStripMenuItem.Checked
+                };
                 sqlTextBox.Text = gen.Generate(SelectedTables(), SelectedKeys(), SelectedCodeGenerators());
             }
             finally
@@ -205,6 +209,12 @@ namespace SqlGenUI
         private void codeList_MouseDown(object sender, MouseEventArgs e)
         {
             sqlTextBox.DoDragDrop(sqlTextBox.Text, DragDropEffects.Copy);
+        }
+
+        private void alterStoredProcsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            alterStoredProcsToolStripMenuItem.Checked = !alterStoredProcsToolStripMenuItem.Checked;
+            GenerateSql();
         }
     }
 }

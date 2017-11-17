@@ -9,10 +9,10 @@ namespace SqlGen.Generators
     {
         public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_AUDIT_InsertTable]";
 
-        public override string Generate(Table table)
+        string Generate(Table table, bool alter)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
+            AppendCreateOrAlterProc(table, null, alter, sb);
             sb.AppendLine($"    @recs [{table.Schema}].[{table.TableName}_TABLE_TYPE] READONLY,");
             sb.AppendLine($"    @auditType CHAR(1) = 'U'");
             sb.AppendLine("AS");
@@ -42,14 +42,15 @@ namespace SqlGen.Generators
         }
 
         // generate audit for details replacement, e.g. replacement of all "order lines" from a FK of "order id"
-        public override string Generate(Table table, TableKey fk)
+        public override string Generate(Table table, TableKey key, bool alter)
         {
-            if (fk == null)
-                return Generate(table);
+            if (key == null)
+                return Generate(table, alter);
 
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
-            foreach (var c in fk)
+            AppendCreateOrAlterProc(table, key, alter, sb);
+
+            foreach (var c in key)
             {
                 sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
             }
@@ -71,14 +72,14 @@ namespace SqlGen.Generators
             {
                 sb.Append($"src.[{c.ColumnName}] = recs.[{c.ColumnName}] AND ");
             }
-            foreach (var c in fk)
+            foreach (var c in key)
             {
                 sb.Append($"src.[{c.ColumnName}] = recs.[{c.ColumnName}] AND ");
             }
             sb.Length -= 5;
             sb.AppendLine();
             sb.AppendLine("WHERE");
-            foreach (var c in fk)
+            foreach (var c in key)
             {
                 sb.AppendLine($"    src.[{c.ColumnName}] = @{c.ColumnName} AND");
             }

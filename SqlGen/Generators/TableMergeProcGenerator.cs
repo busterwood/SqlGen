@@ -6,19 +6,17 @@ namespace SqlGen.Generators
 {
     class TableMergeProcGenerator : SqlGenerator
     {
-        public override string ObjectName(Table table, TableKey fk = null) => $"[{table.Schema}].[{table.TableName}_MergeTable]";
+        public override string ObjectName(Table table, TableKey key = null) => $"[{table.Schema}].[{table.TableName}_MergeTable]";
 
-        public override string Generate(Table table) => Generate(table, null);
-
-        public override string Generate(Table table, TableKey fk)
+        public override string Generate(Table table, TableKey key, bool alter)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE PROCEDURE {ObjectName(table)}");
-            AddFKParameters(fk, sb);
+            AppendCreateOrAlterProc(table, key, alter, sb);
+            AddFKParameters(key, sb);
             sb.AppendLine($"    @recs [{table.Schema}].[{table.TableName}_TABLE_TYPE] READONLY");
             sb.AppendLine("AS");
             sb.AppendLine();
-            ExecAuditProc(table, fk, sb);
+            ExecAuditProc(table, key, sb);
 
             sb.AppendLine($"MERGE INTO [{table.Schema}].[{table.TableName}] as target");
             sb.AppendLine($"USING @recs AS src");
@@ -39,10 +37,10 @@ namespace SqlGen.Generators
             sb.AppendLine($"UPDATE SET");
             AddUpdateAssignments(table, sb);
 
-            if (fk != null)
+            if (key != null)
             {
                 sb.Append($"WHEN MATCHED BY src");
-                foreach (var c in fk)
+                foreach (var c in key)
                 {
                     sb.Append($" AND target.[{c.ColumnName}] = src.[{c.ColumnName}]");
                 }
