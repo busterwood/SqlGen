@@ -35,7 +35,15 @@ order by ORDINAL_POSITION";
 
         public List<Column> LoadColumns(string table, string schema = "dbo")
         {
-            return connection.Query(columnSql, new { table, schema }).ToList<Column>();
+            var cols = connection.Query(columnSql, new { table, schema }).ToList<Column>();
+
+            var last = cols.Where(c => c.IsAuditColumn() || c.IsRowVersion() || c.IsSequenceNumber()).ToList();
+            foreach (var c in last)
+            {
+                cols.Remove(c);
+            }
+            cols.AddRange(last);
+            return cols;
         }
 
         const string primaryKeySql = @"SELECT tc.CONSTRAINT_NAME, ku.COLUMN_NAME
