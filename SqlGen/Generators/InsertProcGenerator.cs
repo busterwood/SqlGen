@@ -15,7 +15,7 @@ namespace SqlGen.Generators
             foreach (var c in table.Columns.Where(c => !c.IsIdentity)) // we want a row version parameter, but it is ignored
             {
                 var optional = c.IsAuditColumn() || c.IsSequenceNumber() || c.IsRowVersion() ? " = NULL" : "";
-                sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()}{optional},");
+                sb.AppendLine($"    @{c} {c.TypeDeclaration()}{optional},");
             }
             sb.Length -= 3;
             sb.AppendLine();

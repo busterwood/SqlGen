@@ -24,7 +24,7 @@ namespace SqlGen.Generators
             foreach (var c in table.Columns.Where(c => c.DataType != "timestamp"))
             {
                 var nullDecl = c.IsNullable() || c.IsSequenceNumber() || table.PrimaryKey.Any(col => col == c) ? "NULL" : "NOT NULL";
-                sb.AppendLine($"    [{c.ColumnName}] {c.TypeDeclaration()} {nullDecl},");
+                sb.AppendLine($"    [{c}] {c.TypeDeclaration()} {nullDecl},");
             }
             sb.Length -= 3;
             sb.AppendLine();
@@ -44,7 +44,7 @@ namespace SqlGen.Generators
             foreach (var c in key)
             {
                 var nullDecl = c.IsNullable() || c.IsSequenceNumber() || table.PrimaryKey.Any(col => col == c) ? "NULL" : "NOT NULL";
-                sb.AppendLine($"    [{c.ColumnName}] {c.TypeDeclaration()} {nullDecl},");
+                sb.AppendLine($"    [{c}] {c.TypeDeclaration()} {nullDecl},");
             }
             sb.Length -= 3;
             sb.AppendLine();

@@ -14,7 +14,7 @@ namespace SqlGen.Generators
             AppendCreateOrAlterProc(table, key, alter, sb);
             foreach (var c in table.PrimaryKey)
             {
-                sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
+                sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
             }
             sb.AppendLine("    @auditType CHAR(1) = 'U'");
             sb.AppendLine("AS");
@@ -25,7 +25,7 @@ namespace SqlGen.Generators
             var insertableColumns = table.Columns.Where(c => !c.IsRowVersion());
             foreach (var c in insertableColumns)
             {
-                sb.AppendLine($"    [{c.ColumnName}],");
+                sb.AppendLine($"    [{c}],");
             }
             sb.AppendLine($"    [AUDIT_TYPE],");
             sb.AppendLine($"    [AUDIT_END_DATE]");
@@ -33,7 +33,7 @@ namespace SqlGen.Generators
             sb.AppendLine("SELECT");
             foreach (var c in insertableColumns)
             {
-                sb.AppendLine($"    [{c.ColumnName}],");
+                sb.AppendLine($"    [{c}],");
             }
 
             sb.AppendLine($"    @auditType,");
@@ -43,7 +43,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"WHERE");
             foreach (var c in table.PrimaryKey)
             {
-                sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName} AND");
+                sb.AppendLine($"    [{c}] = @{c} AND");
             }
             sb.Length -= 5;
             sb.AppendLine();

@@ -31,7 +31,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"    src.[BULK_SEQ],");
             foreach (var c in table.Columns)
             {
-                sb.AppendLine($"    INSERTED.[{c.ColumnName}],");
+                sb.AppendLine($"    INSERTED.[{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine(";");
@@ -42,7 +42,7 @@ namespace SqlGen.Generators
             sb.AppendLine("(");
             foreach (var c in table.InsertableColumns)
             {
-                sb.AppendLine($"    [{c.ColumnName}],");
+                sb.AppendLine($"    [{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine().AppendLine(")");

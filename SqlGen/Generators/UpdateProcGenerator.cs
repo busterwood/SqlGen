@@ -15,7 +15,7 @@ namespace SqlGen.Generators
             foreach (var c in table.Columns)
             {
                 var optional = c.IsAuditColumn() || c.IsSequenceNumber() || c.IsRowVersion() ? " = NULL" : "";
-                sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()}{optional},");
+                sb.AppendLine($"    @{c} {c.TypeDeclaration()}{optional},");
             }
             sb.Length -= 3;
             sb.AppendLine();
@@ -32,7 +32,7 @@ namespace SqlGen.Generators
             sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_Insert] ");
             foreach (var c in table.PrimaryKey)
             {
-                sb.Append($"@{c.ColumnName}, ");
+                sb.Append($"@{c}, ");
             }
             sb.AppendLine(" 'U'"); // type = update
         }

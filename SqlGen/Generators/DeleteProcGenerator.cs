@@ -15,7 +15,7 @@ namespace SqlGen.Generators
             AppendCreateOrAlterProc(table, key, alter, sb);
             foreach (var c in table.PrimaryKey)
             {
-                sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
+                sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
             }
             sb.Length -= 3;
             sb.AppendLine();
@@ -25,7 +25,7 @@ namespace SqlGen.Generators
             sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_Insert] ");
             foreach (var c in table.PrimaryKey)
             {
-                sb.Append($"@{c.ColumnName}, ");
+                sb.Append($"@{c}, ");
             }
             sb.AppendLine(" 'D'"); // type = delete
             sb.AppendLine();
@@ -35,7 +35,7 @@ namespace SqlGen.Generators
             sb.AppendLine("WHERE");
             foreach (var c in table.PrimaryKey)
             {
-                sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName},");
+                sb.AppendLine($"    [{c}] = @{c},");
             }
             sb.Length -= 3;
             sb.AppendLine().AppendLine();

@@ -38,7 +38,7 @@ namespace SqlGen.Generators
             sb.AppendLine("(");
             foreach (var c in table.InsertableColumns)
             {
-                sb.AppendLine($"    [{c.ColumnName}],");
+                sb.AppendLine($"    [{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine().AppendLine(")");
@@ -49,7 +49,7 @@ namespace SqlGen.Generators
             sb.AppendLine("OUTPUT");
             foreach (var c in table.Columns)
             {
-                sb.AppendLine($"    INSERTED.[{c.ColumnName}],");
+                sb.AppendLine($"    INSERTED.[{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine();

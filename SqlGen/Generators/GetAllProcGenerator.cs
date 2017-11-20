@@ -18,7 +18,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"SELECT");
             foreach (var c in table.Columns)
             {
-                sb.AppendLine($"    [{c.ColumnName}],");
+                sb.AppendLine($"    [{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine();

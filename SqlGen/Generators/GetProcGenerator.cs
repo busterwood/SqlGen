@@ -30,7 +30,7 @@ namespace SqlGen.Generators
             AppendCreateOrAlterProc(procName, alter, sb);
             foreach (var c in keysColumns)
             {
-                sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
+                sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
             }
             if (keysColumns.Any())
                 sb.Length -= 3;
@@ -42,7 +42,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"SELECT");
             foreach (var c in table.Columns)
             {
-                sb.AppendLine($"    [{c.ColumnName}],");
+                sb.AppendLine($"    [{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine();
@@ -52,7 +52,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"WHERE");
             foreach (var c in keysColumns)
             {
-                sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName} AND");
+                sb.AppendLine($"    [{c}] = @{c} AND");
             }
             if (keysColumns.Any())
                 sb.Length -= 5;

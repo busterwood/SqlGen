@@ -42,7 +42,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"SELECT");
             foreach (var c in table.Columns)
             {
-                sb.AppendLine($"    [{c.ColumnName}],");
+                sb.AppendLine($"    [{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine();
@@ -52,7 +52,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"WHERE");
             foreach (var c in keysColumns)
             {
-                sb.AppendLine($"    [{c.ColumnName}] IN (SELECT * FROM @{tableTypeParam}) AND");
+                sb.AppendLine($"    [{c}] IN (SELECT * FROM @{tableTypeParam}) AND");
             }
             if (keysColumns.Any())
                 sb.Length -= 5;

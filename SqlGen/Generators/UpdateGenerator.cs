@@ -23,9 +23,9 @@ namespace SqlGen.Generators
             foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
             {
                 if (c.IsSequenceNumber())
-                    sb.AppendLine($"    [{c.ColumnName}] = [{c.ColumnName}] + 1,");
+                    sb.AppendLine($"    [{c}] = [{c}] + 1,");
                 else
-                    sb.AppendLine($"    [{c.ColumnName}] = {c.ParameterValue()},");
+                    sb.AppendLine($"    [{c}] = {c.ParameterValue()},");
             }
 
             sb.Length -= 3;
@@ -37,7 +37,7 @@ namespace SqlGen.Generators
             sb.AppendLine("OUTPUT");
             foreach (var c in table.Columns)
             {
-                sb.AppendLine($"    INSERTED.[{c.ColumnName}],");
+                sb.AppendLine($"    INSERTED.[{c}],");
             }
 
             sb.Length -= 3;
@@ -49,7 +49,7 @@ namespace SqlGen.Generators
             sb.AppendLine("WHERE");
             foreach (var c in table.PrimaryKey)
             {
-                sb.AppendLine($"    [{c.ColumnName}] = @{c.ColumnName},");
+                sb.AppendLine($"    [{c}] = @{c},");
             }
 
             sb.Length -= 3;

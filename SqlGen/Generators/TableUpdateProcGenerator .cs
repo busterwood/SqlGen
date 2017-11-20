@@ -22,7 +22,7 @@ namespace SqlGen.Generators
             sb.AppendLine("SET");
             foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
             {
-                sb.AppendLine($"    [{c.ColumnName}] = {c.TableValue("src")},");
+                sb.AppendLine($"    [{c}] = {c.TableValue("src")},");
             }
             sb.Length -= 3;
             sb.AppendLine();
@@ -30,7 +30,7 @@ namespace SqlGen.Generators
             sb.AppendLine("OUTPUT");
             foreach (var c in table.Columns)
             {
-                sb.AppendLine($"    INSERTED.[{c.ColumnName}],");
+                sb.AppendLine($"    INSERTED.[{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine();
@@ -40,7 +40,7 @@ namespace SqlGen.Generators
             sb.AppendLine("    JOIN @recs AS src ON");
             foreach (var c in table.PrimaryKey)
             {
-                sb.AppendLine($"        target.[{c.ColumnName}] = src.[{c.ColumnName}],");
+                sb.AppendLine($"        target.[{c}] = src.[{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine().AppendLine();

@@ -23,7 +23,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"ON");
             foreach (var c in table.PrimaryKey)
             {
-                sb.AppendLine($"    target.{c.ColumnName} = src.{c.ColumnName} AND");
+                sb.AppendLine($"    target.{c} = src.{c} AND");
             }
             sb.Length -= 5;
             sb.AppendLine();
@@ -42,7 +42,7 @@ namespace SqlGen.Generators
                 sb.Append($"WHEN MATCHED BY src");
                 foreach (var c in key)
                 {
-                    sb.Append($" AND target.[{c.ColumnName}] = src.[{c.ColumnName}]");
+                    sb.Append($" AND target.[{c}] = src.[{c}]");
                 }
                 sb.AppendLine(" THEN");
                 sb.AppendLine("    DELETE");
@@ -61,7 +61,7 @@ namespace SqlGen.Generators
                 sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs");
                 foreach (var c in fk)
                 {
-                    sb.Append($", @{c.ColumnName}=@{c.ColumnName}");
+                    sb.Append($", @{c}=@{c}");
                 }
                 sb.AppendLine();
             }
@@ -74,7 +74,7 @@ namespace SqlGen.Generators
                 return;
             foreach (var c in fk)
             {
-                sb.AppendLine($"    @{c.ColumnName} {c.TypeDeclaration()},");
+                sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
             }
         }
 
@@ -83,7 +83,7 @@ namespace SqlGen.Generators
             sb.AppendLine("(");
             foreach (var c in table.InsertableColumns)
             {
-                sb.AppendLine($"    [{c.ColumnName}],");
+                sb.AppendLine($"    [{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine().AppendLine(")");
@@ -109,9 +109,9 @@ namespace SqlGen.Generators
             foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
             {
                 if (c.IsSequenceNumber())
-                    sb.AppendLine($"    [{c.ColumnName}] = target.{c.ColumnName} + 1,");
+                    sb.AppendLine($"    [{c}] = target.{c} + 1,");
                 else
-                    sb.AppendLine($"    [{c.ColumnName}] = {c.TableValue("src")},");
+                    sb.AppendLine($"    [{c}] = {c.TableValue("src")},");
             }
             sb.Length -= 3;
             sb.AppendLine();
@@ -123,7 +123,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"    src.[BULK_SEQ],");
             foreach (var c in table.Columns)
             {
-                sb.AppendLine($"    INSERTED.[{c.ColumnName}],");
+                sb.AppendLine($"    INSERTED.[{c}],");
             }
             sb.Length -= 3;
             sb.AppendLine(";");

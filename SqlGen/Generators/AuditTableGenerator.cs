@@ -14,7 +14,7 @@ namespace SqlGen
             foreach (var col in table.Columns)
             {
                 var nullable = col.IsNullable() ? "NULL" : "NOT NULL";
-                sb.AppendLine($"    [{col.ColumnName}] {col.TypeDeclaration()} {nullable},");
+                sb.AppendLine($"    [{col}] {col.TypeDeclaration()} {nullable},");
             }
 
             sb.AppendLine($"    [AUDIT_TYPE] char(1) NOT NULL,");
@@ -22,7 +22,7 @@ namespace SqlGen
             sb.Append($"    CONSTRAINT [PK_{table.TableName}_AUDIT] PRIMARY KEY CLUSTERED (");
             foreach (var c in table.PrimaryKey)
             {
-                sb.Append($"[{c.ColumnName}], ");
+                sb.Append($"[{c}], ");
             }
             sb.AppendLine("[SEQUENCE_NUMBER])");
             sb.AppendLine(");");
