@@ -28,7 +28,7 @@ namespace SqlGen.Generators
             sb.Length -= 5;
             sb.AppendLine();
 
-            sb.AppendLine($"WHEN NOT MATCHED BY target THEN");
+            sb.AppendLine($"WHEN NOT MATCHED BY TARGET THEN");
             sb.AppendLine($"INSERT");
             AddInsertFieldNames(table, sb);
             AddInsertValues(sb, table);
@@ -39,7 +39,7 @@ namespace SqlGen.Generators
 
             if (key != null)
             {
-                sb.Append($"WHEN MATCHED BY src");
+                sb.Append($"WHEN NOT MATCHED BY SOURCE");
                 foreach (var c in key)
                 {
                     sb.Append($" AND target.[{c}] = src.[{c}]");
@@ -55,7 +55,7 @@ namespace SqlGen.Generators
         private static void ExecAuditProc(Table table, TableKey fk, StringBuilder sb)
         {
             if (fk == null)
-                sb.AppendLine($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs");
+                sb.AppendLine($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs;");
             else
             {
                 sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs");
@@ -63,7 +63,7 @@ namespace SqlGen.Generators
                 {
                     sb.Append($", @{c}=@{c}");
                 }
-                sb.AppendLine();
+                sb.AppendLine(";");
             }
             sb.AppendLine();
         }
