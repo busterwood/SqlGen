@@ -15,12 +15,12 @@ namespace SqlGen
             sb.AppendLine($"\t\t\tconst string sql = @\"EXEC {table.Schema}.{table.TableName}_Update");
             foreach (var c in table.Columns.Where(c => !c.IsRowVersion()))
             {
-                sb.AppendLine($"{c}=@{c.ColumnName.ToPascalCase()}, ");
+                sb.AppendLine($"@{c}=@{c.ColumnName.ToPascalCase()}, ");
             }
 
             sb.Length -= 4;
             sb.AppendLine("\";");
-            sb.AppendLine($"\t\t\tvar result = connection.QueryProcAsync(sql, {csArgsName}).SingleAsync<{csClassName}>();");
+            sb.AppendLine($"\t\t\tvar result = connection.QueryAsync(sql, {csArgsName}).SingleAsync<{csClassName}>();");
             sb.AppendLine("\t\t}");
             return sb.ToString();
         }

@@ -108,7 +108,7 @@ namespace SqlGen.Generators
 
         private static void AddOptionalDelete(IEnumerable<Column> key, StringBuilder sb)
         {
-            if (key == null)
+            if (key == null || !key.Any())
                 return;
 
             sb.Append($"WHEN NOT MATCHED BY SOURCE");

@@ -16,11 +16,11 @@ namespace SqlGen
             sb.AppendLine($"\t\t\tconst string sql = @\"EXEC {table.Schema}.{table.TableName}_Insert");
             foreach (var c in table.InsertableColumns)
             {                
-                sb.AppendLine($"{c}=@{c.ColumnName.ToPascalCase()}, ");
+                sb.AppendLine($"@{c}=@{c.ColumnName.ToPascalCase()}, ");
             }
             sb.Length -= 4;
             sb.AppendLine("\";");
-            sb.AppendLine($"\t\t\treturn connection.QueryProcAsync(sql, {csArgsName}).SingleAsync<{csClassName}>();");
+            sb.AppendLine($"\t\t\treturn connection.QueryAsync(sql, {csArgsName}).SingleAsync<{csClassName}>();");
             sb.AppendLine("\t\t}");
             return sb.ToString();
         }
