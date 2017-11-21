@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.sqlTextBox = new System.Windows.Forms.RichTextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -36,6 +37,7 @@
             this.schemaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addGrantToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.alterStoredProcsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.codeList = new System.Windows.Forms.ListView();
@@ -44,7 +46,6 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableList = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.alterStoredProcsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -123,6 +124,13 @@
             this.addGrantToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
             this.addGrantToolStripMenuItem.Text = "Add Grant";
             this.addGrantToolStripMenuItem.Click += new System.EventHandler(this.addGrantToolStripMenuItem_Click);
+            // 
+            // alterStoredProcsToolStripMenuItem
+            // 
+            this.alterStoredProcsToolStripMenuItem.Name = "alterStoredProcsToolStripMenuItem";
+            this.alterStoredProcsToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.alterStoredProcsToolStripMenuItem.Text = "ALTER stored procs";
+            this.alterStoredProcsToolStripMenuItem.Click += new System.EventHandler(this.alterStoredProcsToolStripMenuItem_Click);
             // 
             // refreshToolStripMenuItem
             // 
@@ -214,13 +222,6 @@
             this.columnHeader1.Text = "Tables / Views";
             this.columnHeader1.Width = 205;
             // 
-            // aLTERStoredProcsToolStripMenuItem
-            // 
-            this.alterStoredProcsToolStripMenuItem.Name = "aLTERStoredProcsToolStripMenuItem";
-            this.alterStoredProcsToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
-            this.alterStoredProcsToolStripMenuItem.Text = "ALTER stored procs";
-            this.alterStoredProcsToolStripMenuItem.Click += new System.EventHandler(this.alterStoredProcsToolStripMenuItem_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -230,6 +231,7 @@
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.sqlTextBox);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "Sql Generator";
             this.Load += new System.EventHandler(this.Form1_Load);
