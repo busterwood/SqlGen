@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -6,6 +7,8 @@ namespace SqlGen.Generators
 {
     class TableMergeProcGenerator : SqlGenerator
     {
+        static readonly IEnumerable<Column> NoColumns = new Column[0];
+
         public override string ObjectName(Table table, TableKey key = null) => $"[{table.Schema}].[{table.TableName}_MergeTable]";
 
         public override string Generate(Table table, TableKey key, bool alter)
@@ -20,6 +23,22 @@ namespace SqlGen.Generators
 
             sb.AppendLine($"MERGE INTO [{table.Schema}].[{table.TableName}] as target");
             sb.AppendLine($"USING @recs AS src");
+            AddMergeOn(table, sb);
+            sb.AppendLine($"WHEN NOT MATCHED BY TARGET THEN");
+            sb.AppendLine($"INSERT");
+            AddInsertFieldNames(table, sb);
+            AddInsertValues(table, sb);
+            sb.AppendLine($"WHEN MATCHED THEN");
+            sb.AppendLine($"UPDATE SET");
+            AddUpdateAssignments(table, sb);
+            AddOptionalDelete(key, sb);
+            AddOutput(table, sb);
+
+            return sb.ToString();
+        }
+
+        private static void AddMergeOn(Table table, StringBuilder sb)
+        {
             sb.AppendLine($"ON");
             foreach (var c in table.PrimaryKey)
             {
@@ -27,52 +46,22 @@ namespace SqlGen.Generators
             }
             sb.Length -= 5;
             sb.AppendLine();
-
-            sb.AppendLine($"WHEN NOT MATCHED BY TARGET THEN");
-            sb.AppendLine($"INSERT");
-            AddInsertFieldNames(table, sb);
-            AddInsertValues(sb, table);
-
-            sb.AppendLine($"WHEN MATCHED THEN");
-            sb.AppendLine($"UPDATE SET");
-            AddUpdateAssignments(table, sb);
-
-            if (key != null)
-            {
-                sb.Append($"WHEN NOT MATCHED BY SOURCE");
-                foreach (var c in key)
-                {
-                    sb.Append($" AND target.[{c}] = src.[{c}]");
-                }
-                sb.AppendLine(" THEN");
-                sb.AppendLine("    DELETE");
-            }
-
-            AddOutput(table, sb);
-            return sb.ToString();
         }
 
-        private static void ExecAuditProc(Table table, TableKey fk, StringBuilder sb)
+        private static void ExecAuditProc(Table table, IEnumerable<Column> keyCols, StringBuilder sb)
         {
-            if (fk == null)
-                sb.AppendLine($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs;");
-            else
+            sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs");
+            foreach (var c in keyCols ?? NoColumns)
             {
-                sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs=@recs");
-                foreach (var c in fk)
-                {
-                    sb.Append($", @{c}=@{c}");
-                }
-                sb.AppendLine(";");
+                sb.Append($", @{c}=@{c}");
             }
+            sb.AppendLine(";");
             sb.AppendLine();
         }
 
-        private static void AddFKParameters(TableKey fk, StringBuilder sb)
+        private static void AddFKParameters(IEnumerable<Column> keyCols, StringBuilder sb)
         {
-            if (fk == null)
-                return;
-            foreach (var c in fk)
+            foreach (var c in keyCols ?? NoColumns)
             {
                 sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
             }
@@ -89,7 +78,7 @@ namespace SqlGen.Generators
             sb.AppendLine().AppendLine(")");
         }
 
-        private static void AddInsertValues(StringBuilder sb, Table table)
+        private static void AddInsertValues(Table table, StringBuilder sb)
         {
             sb.AppendLine("VALUES");
             sb.AppendLine("(");
@@ -115,6 +104,20 @@ namespace SqlGen.Generators
             }
             sb.Length -= 3;
             sb.AppendLine();
+        }
+
+        private static void AddOptionalDelete(IEnumerable<Column> key, StringBuilder sb)
+        {
+            if (key == null)
+                return;
+
+            sb.Append($"WHEN NOT MATCHED BY SOURCE");
+            foreach (var c in key)
+            {
+                sb.Append($" AND target.[{c}] = src.[{c}]");
+            }
+            sb.AppendLine(" THEN");
+            sb.AppendLine("    DELETE");
         }
 
         private static void AddOutput(Table table, StringBuilder sb)

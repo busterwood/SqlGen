@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-
-namespace SqlGen
+﻿namespace SqlGen
 {
     public abstract class Generator
     {
