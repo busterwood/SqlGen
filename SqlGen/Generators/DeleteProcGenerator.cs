@@ -21,7 +21,8 @@ namespace SqlGen.Generators
             IEnumerable<Column> keyCols = key ?? table.PrimaryKey;
 
             var sb = new StringBuilder();
-            AppendCreateOrAlterProc(table, key, alter, sb);
+
+            AppendCreateOrAlterProc(ObjectName(table, key), alter, sb);
             foreach (var c in keyCols)
             {
                 sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
