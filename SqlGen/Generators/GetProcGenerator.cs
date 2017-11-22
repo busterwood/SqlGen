@@ -12,7 +12,7 @@ namespace SqlGen.Generators
             if (key == null)
                 return $"[{table.Schema}].[{table.TableName}_Get]";
 
-            var name = string.Join("And", key.Select(c => ToTitleCase(c.ColumnName)));
+            var name = string.Join("And", key.Select(c => c.ColumnName.ToPascalCase()));
             return $"[{table.Schema}].[{table.TableName}_GetBy{name}]";
         }
 
@@ -59,11 +59,6 @@ namespace SqlGen.Generators
             sb.AppendLine();
 
             return sb.ToString();
-        }
-
-        static string ToTitleCase(string columnName)
-        {
-            return string.Join("", columnName.Split('_').Select(word => word.ToLower()).Select(word => char.ToUpper(word[0]) + word.Substring(1)));
         }
 
         public override string ToString() => "Proc Get";
