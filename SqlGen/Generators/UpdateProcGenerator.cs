@@ -32,9 +32,9 @@ namespace SqlGen.Generators
             sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_Insert] ");
             foreach (var c in table.PrimaryKey)
             {
-                sb.Append($"@{c}, ");
+                sb.Append($"@{c}=@{c}, ");
             }
-            sb.AppendLine(" 'U'"); // type = update
+            sb.AppendLine("@auditType='D'"); // type = delete
         }
 
         public override string GrantType() => "OBJECT";

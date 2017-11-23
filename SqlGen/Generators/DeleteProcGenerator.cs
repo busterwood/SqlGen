@@ -37,7 +37,7 @@ namespace SqlGen.Generators
             {
                 sb.Append($"@{c}=@{c}, ");
             }
-            sb.AppendLine(" 'D'"); // type = delete
+            sb.AppendLine("@auditType='D'"); // type = delete
             sb.AppendLine();
 
             sb.AppendLine($"DELETE FROM");
