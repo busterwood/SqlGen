@@ -56,10 +56,11 @@
             this.sqlTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.sqlTextBox.BackColor = System.Drawing.SystemColors.Window;
+            this.sqlTextBox.BackColor = System.Drawing.Color.Black;
+            this.sqlTextBox.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.sqlTextBox.ForeColor = System.Drawing.Color.White;
             this.sqlTextBox.Location = new System.Drawing.Point(0, 209);
             this.sqlTextBox.Name = "sqlTextBox";
-            this.sqlTextBox.ReadOnly = true;
             this.sqlTextBox.Size = new System.Drawing.Size(832, 295);
             this.sqlTextBox.TabIndex = 1;
             this.sqlTextBox.Text = "";
