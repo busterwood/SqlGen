@@ -21,10 +21,10 @@ namespace SqlGenUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            databaseToolStripMenuItem.DropDownItems.AddRange(
+            serverToolStripMenuItem.DropDownItems.AddRange(
                 ConfigurationManager.ConnectionStrings
                     .Cast<ConnectionStringSettings>()
-                    .Select(cs => new ToolStripMenuItem(cs.Name, null, DatabaseChanged) { Tag = cs, Checked = cs.Name == "local" })
+                    .Select(cs => new ToolStripMenuItem(cs.Name, null, ServerChanged) { Tag = cs, Checked = cs.Name == "local" })
                     .ToArray<ToolStripItem>()
             );
 
@@ -40,23 +40,16 @@ namespace SqlGenUI
             codeList.Columns[0].Width = codeList.Width - 4 - SystemInformation.VerticalScrollBarWidth;
         }
 
-        private void DatabaseChanged(object sender, EventArgs e)
+        private void ServerChanged(object sender, EventArgs e)
         {
-            foreach (ToolStripMenuItem mi in databaseToolStripMenuItem.DropDownItems)
+            foreach (ToolStripMenuItem mi in serverToolStripMenuItem.DropDownItems)
                 mi.Checked = false;
 
             var menu = (ToolStripMenuItem)sender;
             menu.Checked = true;
+            databaseToolStripMenuItem.DropDownItems.Clear();
+
             RefreshFromDb((ConnectionStringSettings)menu.Tag);
-        }
-
-        private void RefreshFromDb(ConnectionStringSettings settings)
-        {
-            tableList.Items.Clear();
-
-            RunLoadTablesAsync(settings.ConnectionString);
-
-            toolStripStatusLabel1.Text = new SqlConnectionStringBuilder(settings.ConnectionString) { Password = "xxx" }.ToString();
         }
 
         private void RefreshCodeGenerators()
@@ -74,9 +67,54 @@ namespace SqlGenUI
             codeList.Items.AddRange(generators.ToArray());
         }
 
-        async Task RunLoadTablesAsync(string connectionString)
+        private void RefreshFromDb(ConnectionStringSettings settings)
         {
             Cursor = Cursors.AppStarting;
+
+            tableList.Items.Clear();
+            var database = CheckedDatabase;
+
+            if (database == null)
+            {
+                RunLoadDatabasesAsync(settings.ConnectionString);
+                RunLoadTablesAsync(settings.ConnectionString);
+            }
+            else
+            {
+                var b = new SqlConnectionStringBuilder(settings.ConnectionString);
+                b["Database"] = database;
+                RunLoadTablesAsync(b.ToString());
+            }
+
+            toolStripStatusLabel1.Text = new SqlConnectionStringBuilder(settings.ConnectionString) { Password = "xxx" }.ToString();
+        }
+
+        async Task RunLoadDatabasesAsync(string connectionString)
+        {
+            Task.Yield();
+
+            using (var cnn = new SqlConnection(connectionString))
+            {
+                var da = new TableDataAccess(cnn);
+                var databases = await da.ListDatabases();
+                BeginInvoke((Action<List<string>, string>)PopulateDatabases, databases, await da.CurrentDatabase());
+            }
+        }
+
+        void PopulateDatabases(List<string> databases, string currrentDB)
+        {
+            databaseToolStripMenuItem.DropDownItems.Clear();
+            databaseToolStripMenuItem.DropDownItems.AddRange(databases.Select(db => new ToolStripMenuItem(db, null, database_OnClick) { Checked = db == currrentDB }).ToArray());
+        }
+
+        void database_OnClick(object sender, EventArgs args)
+        {
+            CheckedDatabase = ((ToolStripMenuItem)sender).Text;
+            RefreshFromDb(CheckedConnectionString());
+        }
+
+        async Task RunLoadTablesAsync(string connectionString)
+        {
             Task.Yield();
 
             using (var cnn = new SqlConnection(connectionString))
@@ -119,7 +157,7 @@ namespace SqlGenUI
             Cursor = Cursors.AppStarting;
             try
             {
-                var gen = new MultiGenerator(CheckConnectionString().ConnectionString)
+                var gen = new MultiGenerator(CheckedConnectionString().ConnectionString)
                 {
                     Alter = alterStoredProcsToolStripMenuItem.Checked,
                     Grant = addGrantToolStripMenuItem.Checked
@@ -129,6 +167,18 @@ namespace SqlGenUI
             finally
             {
                 Cursor = Cursors.Default;
+            }
+        }
+
+        string CheckedDatabase
+        {
+            get { return databaseToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>().FirstOrDefault(mi => mi.Checked)?.Text;  }
+            set
+            {
+                foreach (var mi in databaseToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>())
+                {
+                    mi.Checked = mi.Text == value ? !mi.Checked : false;
+                }
             }
         }
 
@@ -150,9 +200,9 @@ namespace SqlGenUI
 
         private IEnumerable<TableKey> SelectedKeys() => fkList.SelectedItems.Cast<ListViewItem>().Select(lvi => (TableKey)lvi.Tag);
 
-        private ConnectionStringSettings CheckConnectionString()
+        private ConnectionStringSettings CheckedConnectionString()
         {
-            var dbMenu = databaseToolStripMenuItem.DropDownItems.Cast<ToolStripMenuItem>().FirstOrDefault(mi => mi.Checked);
+            var dbMenu = serverToolStripMenuItem.DropDownItems.Cast<ToolStripMenuItem>().FirstOrDefault(mi => mi.Checked);
             return (ConnectionStringSettings)dbMenu.Tag;
         }
 
@@ -176,7 +226,7 @@ namespace SqlGenUI
                 return;
 
             await Task.Yield();
-            ConnectionStringSettings connectionSettings = CheckConnectionString();
+            ConnectionStringSettings connectionSettings = CheckedConnectionString();
             table.EnsureFullyPopulated(connectionSettings.ConnectionString);
             BeginInvoke((Action<Table>)PopulateForeignKeyList, table);
         }
@@ -202,7 +252,7 @@ namespace SqlGenUI
 
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var menu = databaseToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>().Single(mi => mi.Checked);
+            var menu = serverToolStripMenuItem.DropDownItems.OfType<ToolStripMenuItem>().Single(mi => mi.Checked);
             RefreshFromDb((ConnectionStringSettings)menu.Tag);
         }
 

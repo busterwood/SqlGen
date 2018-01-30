@@ -105,6 +105,23 @@ where TABLE_SCHEMA = @schema and TABLE_NAME = @table";
         {
             return connection.Query(foreignKeyColumnSql, new { table, schema }).ToLookup<string, KeyColumn>(c => c.ConstraintName);
         }
+
+        public async Task<List<string>> ListDatabases()
+        {
+            var dbs = await connection.QueryAsync("select name from sys.databases where state = 0").ToListAsync<Database>();
+            return dbs.Select(db => db.Name).ToList();
+        }
+
+        public async Task<string> CurrentDatabase()
+        {
+            var db = await connection.QueryAsync("select DB_NAME() as Name").SingleAsync<Database>();
+            return db.Name;
+        }
+    }
+
+    class Database
+    {
+        public string Name { get; set; }
     }
 
     public abstract class TableKey : IEnumerable<Column>
