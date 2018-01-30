@@ -105,6 +105,38 @@ namespace SqlGen
             }
         }
 
+        public static string ClrTypeName(this Column c)
+        {
+            switch (c.DataType.ToLower())
+            {
+                case "char":
+                case "nchar":
+                case "varchar":
+                case "nvarchar":
+                    return "string";
+                case "numeric":
+                case "decimal":
+                    return c.IsNullable() ? "decimal?" : "decimal";
+                case "int":
+                    return c.IsNullable() ? "int?" : "int";
+                case "bigint":
+                    return c.IsNullable() ? "long?" : "long";
+                case "smallint":
+                    return c.IsNullable() ? "short?" : "short";
+                case "tinyint":
+                    return c.IsNullable() ? "byte?" : "byte";
+                case "bit":
+                    return c.IsNullable() ? "bool?" : "bool";
+                case "datetime":
+                case "datetime2":
+                    return c.IsNullable() ? "DateTime?" : "DateTime";
+                case "binary":
+                case "varbinary":
+                    return "byte[]";
+                default:
+                    return c.DataType;
+            }
+        }
     }
 
 }

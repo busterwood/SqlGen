@@ -157,7 +157,7 @@ namespace SqlGenUI
             Cursor = Cursors.AppStarting;
             try
             {
-                var gen = new MultiGenerator(CheckedConnectionString().ConnectionString)
+                var gen = new MultiGenerator(CurrentConnectionStringAndDatabase())
                 {
                     Alter = alterStoredProcsToolStripMenuItem.Checked,
                     Grant = addGrantToolStripMenuItem.Checked
@@ -168,6 +168,16 @@ namespace SqlGenUI
             {
                 Cursor = Cursors.Default;
             }
+        }
+
+        private string CurrentConnectionStringAndDatabase()
+        {
+            if (CheckedDatabase == null)
+                return CheckedConnectionString().ConnectionString;
+
+            var b = new SqlConnectionStringBuilder(CheckedConnectionString().ConnectionString);
+            b["Database"] = CheckedDatabase;
+            return b.ToString();
         }
 
         string CheckedDatabase
