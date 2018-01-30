@@ -1,11 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlGen", "SqlGen\SqlGen.csproj", "{4457E3C2-611D-4CF2-A444-B711BB29C4E3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlGenUI", "SqlGenUI\SqlGenUI.csproj", "{0788B434-D758-46C3-BD7D-ABCAFCC42A54}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{3D53EE36-5136-4C45-8B9E-525B384EB462}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		screen-shot.png = screen-shot.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +30,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6EE6230C-BBD9-4FF0-9A07-B64CA8103DDA}
 	EndGlobalSection
 EndGlobal
