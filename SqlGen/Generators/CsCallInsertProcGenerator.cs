@@ -14,7 +14,7 @@ namespace SqlGen
             sb.AppendLine($"\t\tTask<{csClassName}> InsertAsync(DbConnection connection, {csClassName} {csArgsName})");
             sb.AppendLine("\t\t{");
             sb.AppendLine($"\t\t\tconst string sql = @\"EXEC {table.Schema}.{table.TableName}_Insert");
-            foreach (var c in table.InsertableColumns)
+            foreach (var c in table.InsertableColumns.Where(c => options.Audit || !c.IsAuditColumn()))
             {                
                 sb.AppendLine($"@{c}=@{c.ColumnName.ToPascalCase()}, ");
             }

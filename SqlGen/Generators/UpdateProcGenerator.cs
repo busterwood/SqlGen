@@ -12,7 +12,7 @@ namespace SqlGen.Generators
         {
             var sb = new StringBuilder();
             AppendCreateOrAlterProc(table, options, sb);
-            foreach (var c in table.Columns)
+            foreach (var c in table.Columns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 var optional = c.IsAuditColumn() || c.IsSequenceNumber() || c.IsRowVersion() ? " = NULL" : "";
                 sb.AppendLine($"    @{c} {c.TypeDeclaration()}{optional},");
@@ -20,7 +20,8 @@ namespace SqlGen.Generators
             sb.Length -= 3;
             sb.AppendLine();
             sb.AppendLine("AS");
-            AppendExecAuditProc(table, sb);
+            if (options.Audit)
+                AppendExecAuditProc(table, sb);
             sb.AppendLine();
             sb.Append(base.Generate(table, options));
             return sb.ToString();

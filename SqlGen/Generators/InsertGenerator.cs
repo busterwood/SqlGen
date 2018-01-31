@@ -12,17 +12,17 @@ namespace SqlGen.Generators
         {
             var sb = new StringBuilder();
             sb.AppendLine($"INSERT INTO [{table.Schema}].[{table.TableName}]");
-            AppendColumnList(table, sb);
-            AppendOutput(table, sb);
-            AppendValues(table, sb);
+            AppendColumnList(table, options, sb);
+            AppendOutput(table, options, sb);
+            AppendValues(table, options, sb);
             return sb.ToString();
         }
 
-        private static void AppendValues(Table table, StringBuilder sb)
+        private static void AppendValues(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("VALUES");
             sb.AppendLine("(");
-            foreach (var c in table.InsertableColumns)
+            foreach (var c in table.InsertableColumns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 if (c.IsSequenceNumber())
                     sb.AppendLine($"    ISNULL(@{c}, 1),");
@@ -33,10 +33,10 @@ namespace SqlGen.Generators
             sb.AppendLine().AppendLine(")");
         }
 
-        private static void AppendColumnList(Table table, StringBuilder sb)
+        private static void AppendColumnList(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("(");
-            foreach (var c in table.InsertableColumns)
+            foreach (var c in table.InsertableColumns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 sb.AppendLine($"    [{c}],");
             }
@@ -44,10 +44,10 @@ namespace SqlGen.Generators
             sb.AppendLine().AppendLine(")");
         }
 
-        private static void AppendOutput(Table table, StringBuilder sb)
+        private static void AppendOutput(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("OUTPUT");
-            foreach (var c in table.Columns)
+            foreach (var c in table.Columns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 sb.AppendLine($"    INSERTED.[{c}],");
             }

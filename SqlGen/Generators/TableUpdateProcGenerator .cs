@@ -15,12 +15,16 @@ namespace SqlGen.Generators
             sb.AppendLine($"    @recs [{table.Schema}].[{table.TableName}_TABLE_TYPE] READONLY");
             sb.AppendLine("AS");
             sb.AppendLine();
-            sb.AppendLine($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs, 'U'");
-            sb.AppendLine();
+
+            if (options.Audit)
+            {
+                sb.AppendLine($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_InsertTable] @recs, 'U'");
+                sb.AppendLine();
+            }
 
             sb.AppendLine($"UPDATE [{table.Schema}].[{table.TableName}]");
             sb.AppendLine("SET");
-            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
+            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col) && (options.Audit || !col.IsAuditColumn())))
             {
                 sb.AppendLine($"    [{c}] = {c.TableValue("src")},");
             }
@@ -28,7 +32,7 @@ namespace SqlGen.Generators
             sb.AppendLine();
 
             sb.AppendLine("OUTPUT");
-            foreach (var c in table.Columns)
+            foreach (var c in table.Columns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 sb.AppendLine($"    INSERTED.[{c}],");
             }

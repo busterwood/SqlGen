@@ -26,13 +26,13 @@ namespace SqlGen.Generators
             AddMergeOn(table, sb);
             sb.AppendLine($"WHEN NOT MATCHED BY TARGET THEN");
             sb.AppendLine($"INSERT");
-            AddInsertFieldNames(table, sb);
-            AddInsertValues(table, sb);
+            AddInsertFieldNames(table, options, sb);
+            AddInsertValues(table, options, sb);
             sb.AppendLine($"WHEN MATCHED THEN");
             sb.AppendLine($"UPDATE SET");
-            AddUpdateAssignments(table, sb);
+            AddUpdateAssignments(table, options, sb);
             AddOptionalDelete(options.Key, sb);
-            AddOutput(table, sb);
+            AddOutput(table, options, sb);
 
             return sb.ToString();
         }
@@ -67,10 +67,10 @@ namespace SqlGen.Generators
             }
         }
 
-        private static void AddInsertFieldNames(Table table, StringBuilder sb)
+        private static void AddInsertFieldNames(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("(");
-            foreach (var c in table.InsertableColumns)
+            foreach (var c in table.InsertableColumns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 sb.AppendLine($"    [{c}],");
             }
@@ -78,11 +78,11 @@ namespace SqlGen.Generators
             sb.AppendLine().AppendLine(")");
         }
 
-        private static void AddInsertValues(Table table, StringBuilder sb)
+        private static void AddInsertValues(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("VALUES");
             sb.AppendLine("(");
-            foreach (var c in table.InsertableColumns)
+            foreach (var c in table.InsertableColumns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 if (c.IsSequenceNumber())
                     sb.AppendLine($"    1,");
@@ -93,9 +93,9 @@ namespace SqlGen.Generators
             sb.AppendLine().AppendLine(")");
         }
 
-        private void AddUpdateAssignments(Table table, StringBuilder sb)
+        private void AddUpdateAssignments(Table table, GeneratorOptions options, StringBuilder sb)
         {
-            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
+            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)).Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 if (c.IsSequenceNumber())
                     sb.AppendLine($"    [{c}] = target.{c} + 1,");
@@ -120,11 +120,11 @@ namespace SqlGen.Generators
             sb.AppendLine("    DELETE");
         }
 
-        private static void AddOutput(Table table, StringBuilder sb)
+        private static void AddOutput(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("OUTPUT");
             sb.AppendLine($"    src.[BULK_SEQ],");
-            foreach (var c in table.Columns)
+            foreach (var c in table.Columns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 sb.AppendLine($"    INSERTED.[{c}],");
             }

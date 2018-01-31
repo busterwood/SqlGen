@@ -32,13 +32,11 @@ namespace SqlGen.Generators
 
             sb.AppendLine("AS");
             sb.AppendLine();
-            sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_Insert] ");
-            foreach (var c in keyCols)
+
+            if (options.Audit)
             {
-                sb.Append($"@{c}=@{c}, ");
+                CallAuditProc(table, keyCols, sb);
             }
-            sb.AppendLine("@auditType='D'"); // type = delete
-            sb.AppendLine();
 
             sb.AppendLine($"DELETE FROM");
             sb.AppendLine($"    [{table.Schema}].[{table.TableName}]");
@@ -51,6 +49,18 @@ namespace SqlGen.Generators
             sb.AppendLine().AppendLine();
 
             return sb.ToString();
+        }
+
+        private static void CallAuditProc(Table table, IEnumerable<Column> keyCols, StringBuilder sb)
+        {
+            sb.Append($"EXEC [{table.Schema}].[{table.TableName}_AUDIT_Insert] ");
+
+            foreach (var c in keyCols)
+            {
+                sb.Append($"@{c}=@{c}, ");
+            }
+            sb.AppendLine("@auditType='D'"); // type = delete
+            sb.AppendLine();
         }
 
         public override string ToString() => "Proc Delete";

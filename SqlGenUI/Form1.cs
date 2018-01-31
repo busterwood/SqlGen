@@ -163,7 +163,7 @@ namespace SqlGenUI
                     {
                         Alter = alterStoredProcsToolStripMenuItem.Checked,
                         Grant = addGrantToolStripMenuItem.Checked,
-                        //Audit = auditToolStripMenuItem.Checked
+                        Audit = includeAuditColumnsToolStripMenuItem.Checked
                     }
                 };
                 sqlTextBox.Text = gen.Generate(SelectedTables(), SelectedKeys(), SelectedCodeGenerators());
@@ -278,6 +278,12 @@ namespace SqlGenUI
         private void alterStoredProcsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             alterStoredProcsToolStripMenuItem.Checked = !alterStoredProcsToolStripMenuItem.Checked;
+            GenerateSql();
+        }
+
+        private void includeAuditColumnsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            includeAuditColumnsToolStripMenuItem.Checked = !includeAuditColumnsToolStripMenuItem.Checked;
             GenerateSql();
         }
     }

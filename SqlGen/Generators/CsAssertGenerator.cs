@@ -12,9 +12,9 @@ namespace SqlGen
             var sb = new StringBuilder();
             sb.AppendLine($"\t\tvoid AssertAreEqual({csClassName} expected, {csClassName} actual)");
             sb.AppendLine("\t\t{");
-            foreach (var c in table.Columns.Where(c => !c.IsRowVersion()))
+            foreach (var col in table.Columns.Where(c => !c.IsRowVersion() && (options.Audit || !c.IsAuditColumn())))
             {
-                var propName = c.ColumnName.ToPascalCase();
+                var propName = col.ColumnName.ToPascalCase();
                 sb.AppendLine($"\t\t\tAssert.AreEqual(expected.{propName}, actual.{propName}, \"{propName}\");");
             }
 

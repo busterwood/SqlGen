@@ -12,7 +12,7 @@ namespace SqlGen
             var sb = new StringBuilder();
             sb.AppendLine($"\tpublic class {csClassName}");
             sb.AppendLine("\t{");
-            foreach (var c in table.Columns.Where(c => !c.IsRowVersion()))
+            foreach (var c in table.Columns.Where(c => !c.IsRowVersion() && (options.Audit || !c.IsAuditColumn())))
             {
                 var propName = c.ColumnName.ToPascalCase();
                 var propType = c.ClrTypeName();
@@ -23,6 +23,6 @@ namespace SqlGen
             return sb.ToString();
         }
 
-        public override string ToString() => "C# class";
+        public override string ToString() => "C# Class";
     }
 }

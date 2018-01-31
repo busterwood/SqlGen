@@ -19,17 +19,17 @@ namespace SqlGen.Generators
             sb.AppendLine($"MERGE INTO [{table.Schema}].[{table.TableName}] USING @recs AS src ON 1 = 0");
             sb.AppendLine($"WHEN NOT MATCHED THEN INSERT");
 
-            AddFieldNames(table, sb);
-            AddValues(sb, table);
-            AddOutput(table, sb);
+            AddFieldNames(table, options, sb);
+            AddValues(table, options, sb);
+            AddOutput(table, options, sb);
             return sb.ToString();
         }
 
-        private static void AddOutput(Table table, StringBuilder sb)
+        private static void AddOutput(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("OUTPUT");
             sb.AppendLine($"    src.[BULK_SEQ],");
-            foreach (var c in table.Columns)
+            foreach (var c in table.Columns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 sb.AppendLine($"    INSERTED.[{c}],");
             }
@@ -37,10 +37,10 @@ namespace SqlGen.Generators
             sb.AppendLine(";");
         }
 
-        private static void AddFieldNames(Table table, StringBuilder sb)
+        private static void AddFieldNames(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("(");
-            foreach (var c in table.InsertableColumns)
+            foreach (var c in table.InsertableColumns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 sb.AppendLine($"    [{c}],");
             }
@@ -48,11 +48,11 @@ namespace SqlGen.Generators
             sb.AppendLine().AppendLine(")");
         }
 
-        private static void AddValues(StringBuilder sb, Table table)
+        private static void AddValues(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("VALUES");
             sb.AppendLine("(");
-            foreach (var c in table.InsertableColumns)
+            foreach (var c in table.InsertableColumns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 if (c.IsSequenceNumber())
                     sb.AppendLine($"    1,");

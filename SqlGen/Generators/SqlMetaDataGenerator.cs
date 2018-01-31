@@ -12,7 +12,7 @@ namespace SqlGen
             sb.AppendLine($"\t\tstatic readonly SqlMetaData[] {varName}");
             sb.AppendLine("\t\t{");
             sb.AppendLine("\t\t\tnew SqlMetaData(\"BULK_SEQ\", SqlDbType.Int),");
-            foreach (var c in table.Columns.Where(c => !c.IsRowVersion()))
+            foreach (var c in table.Columns.Where(c => !c.IsRowVersion() && (options.Audit || !c.IsAuditColumn())))
             {                
                 sb.AppendLine($"\t\t\tnew SqlMetaData(\"{c}\", SqlDbType.{TypeAndLength(c)}),");
             }
@@ -25,11 +25,11 @@ namespace SqlGen
             switch (c.DataType)
             {
                 case "bigint":
-                    return $"BigInt";
+                    return "BigInt";
                 case "smallint":
-                    return $"SmallInt";
+                    return "SmallInt";
                 case "tinyint":
-                    return $"TinyInt";
+                    return "TinyInt";
                 case "binary":
                     return $"Binary, {c.CharacterMaximumLength}";
                 case "varbinary":
@@ -46,13 +46,13 @@ namespace SqlGen
                 case "numeric":
                     return $"Decimal, {c.NumericPrecision}, {c.NumericScale}";
                 case "datetime":
-                    return $"DateTime";
+                    return "DateTime";
                 case "datetimeoffset":
-                    return $"DateTimeOffset";
+                    return "DateTimeOffset";
                 case "smalldatetime":
-                    return $"SmallDateTime";
+                    return "SmallDateTime";
                 case "datetime2":
-                    return $"DateTime2";
+                    return "DateTime2";
                 default:
                     return c.DataType.ToPascalCase();
             }            

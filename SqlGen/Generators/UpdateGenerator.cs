@@ -11,33 +11,33 @@ namespace SqlGen.Generators
         {
             var sb = new StringBuilder();
             sb.AppendLine($"UPDATE [{table.Schema}].[{table.TableName}]");
-            AppendSet(table, sb);
-            AppendOutput(table, sb);
+            AppendSet(table, options, sb);
+            AppendOutput(table, options, sb);
             AppendWhere(table, sb);
             return sb.ToString();
         }
 
-        private static void AppendSet(Table table, StringBuilder sb)
+        private static void AppendSet(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("SET");
-            foreach (var c in table.InsertableColumns.Where(col => !table.PrimaryKey.Contains(col)))
+            foreach (var col in table.InsertableColumns.Where(c => !table.PrimaryKey.Contains(c) && (options.Audit || !c.IsAuditColumn())))
             {
-                if (c.IsSequenceNumber())
-                    sb.AppendLine($"    [{c}] = [{c}] + 1,");
+                if (col.IsSequenceNumber())
+                    sb.AppendLine($"    [{col}] = [{col}] + 1,");
                 else
-                    sb.AppendLine($"    [{c}] = {c.ParameterValue()},");
+                    sb.AppendLine($"    [{col}] = {col.ParameterValue()},");
             }
 
             sb.Length -= 3;
             sb.AppendLine();
         }
 
-        private static void AppendOutput(Table table, StringBuilder sb)
+        private static void AppendOutput(Table table, GeneratorOptions options, StringBuilder sb)
         {
             sb.AppendLine("OUTPUT");
-            foreach (var c in table.Columns)
+            foreach (var col in table.Columns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
-                sb.AppendLine($"    INSERTED.[{c}],");
+                sb.AppendLine($"    INSERTED.[{col}],");
             }
 
             sb.Length -= 3;
@@ -47,9 +47,9 @@ namespace SqlGen.Generators
         private static void AppendWhere(Table table, StringBuilder sb)
         {
             sb.AppendLine("WHERE");
-            foreach (var c in table.PrimaryKey)
+            foreach (var col in table.PrimaryKey)
             {
-                sb.AppendLine($"    [{c}] = @{c},");
+                sb.AppendLine($"    [{col}] = @{col},");
             }
 
             sb.Length -= 3;

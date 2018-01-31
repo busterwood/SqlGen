@@ -40,7 +40,7 @@ namespace SqlGen.Generators
             sb.AppendLine();
 
             sb.AppendLine($"SELECT");
-            foreach (var c in table.Columns)
+            foreach (var c in table.Columns.Where(c => options.Audit || !c.IsAuditColumn()))
             {
                 sb.AppendLine($"    [{c}],");
             }

@@ -15,13 +15,13 @@ namespace SqlGen.Generators
             return $"[{table.Schema}].[{key.ConstraintName.ToUpper()}_TABLE_TYPE]";
         }
 
-        string Generate(Table table)
+        string GenerateNoKey(Table table, GeneratorOptions options)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"CREATE TYPE {ObjectName(table)} AS TABLE");
             sb.AppendLine("(");
             sb.AppendLine("    [BULK_SEQ] INT NULL, -- must be set for inserts");
-            foreach (var c in table.Columns.Where(c => c.DataType != "timestamp"))
+            foreach (var c in table.Columns.Where(c => c.DataType != "timestamp" && (options.Audit || !c.IsAuditColumn())))
             {
                 var nullDecl = c.IsNullable() || c.IsSequenceNumber() || table.PrimaryKey.Any(col => col == c) ? "NULL" : "NOT NULL";
                 sb.AppendLine($"    [{c}] {c.TypeDeclaration()} {nullDecl},");
@@ -36,7 +36,7 @@ namespace SqlGen.Generators
         public override string Generate(Table table, GeneratorOptions options)
         {
             if (options.Key == null)
-                return Generate(table);
+                return GenerateNoKey(table, options);
 
             var sb = new StringBuilder();
             sb.AppendLine($"CREATE TYPE {ObjectName(table, options.Key)} AS TABLE");
