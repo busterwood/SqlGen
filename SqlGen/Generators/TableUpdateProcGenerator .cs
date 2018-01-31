@@ -8,10 +8,10 @@ namespace SqlGen.Generators
     {
         public override string ObjectName(Table table, TableKey key = null) => $"[{table.Schema}].[{table.TableName}_UpdateTable]";
 
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
             var sb = new StringBuilder();
-            AppendCreateOrAlterProc(table, key, alter, sb);
+            AppendCreateOrAlterProc(table, options, sb);
             sb.AppendLine($"    @recs [{table.Schema}].[{table.TableName}_TABLE_TYPE] READONLY");
             sb.AppendLine("AS");
             sb.AppendLine();

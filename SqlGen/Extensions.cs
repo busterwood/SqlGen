@@ -2,7 +2,7 @@
 
 namespace SqlGen
 {
-    public static class Extensions
+    public static partial class Extensions
     {
         public static string ToPascalCase(this string sqlName)
         {

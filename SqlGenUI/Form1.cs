@@ -159,8 +159,12 @@ namespace SqlGenUI
             {
                 var gen = new MultiGenerator(CurrentConnectionStringAndDatabase())
                 {
-                    Alter = alterStoredProcsToolStripMenuItem.Checked,
-                    Grant = addGrantToolStripMenuItem.Checked
+                    Options = new GeneratorOptions
+                    {
+                        Alter = alterStoredProcsToolStripMenuItem.Checked,
+                        Grant = addGrantToolStripMenuItem.Checked,
+                        //Audit = auditToolStripMenuItem.Checked
+                    }
                 };
                 sqlTextBox.Text = gen.Generate(SelectedTables(), SelectedKeys(), SelectedCodeGenerators());
             }

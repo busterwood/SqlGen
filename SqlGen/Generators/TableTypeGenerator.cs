@@ -33,15 +33,15 @@ namespace SqlGen.Generators
             return sb.ToString();
         }
 
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
-            if (key == null)
+            if (options.Key == null)
                 return Generate(table);
 
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE TYPE {ObjectName(table, key)} AS TABLE");
+            sb.AppendLine($"CREATE TYPE {ObjectName(table, options.Key)} AS TABLE");
             sb.AppendLine("(");
-            foreach (var c in key)
+            foreach (var c in options.Key)
             {
                 var nullDecl = c.IsNullable() || c.IsSequenceNumber() || table.PrimaryKey.Any(col => col == c) ? "NULL" : "NOT NULL";
                 sb.AppendLine($"    [{c}] {c.TypeDeclaration()} {nullDecl},");

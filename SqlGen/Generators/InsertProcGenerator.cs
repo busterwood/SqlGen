@@ -8,10 +8,10 @@ namespace SqlGen.Generators
     {
         public override string ObjectName(Table table, TableKey key = null) => $"[{table.Schema}].[{table.TableName}_Insert]";
 
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
             var sb = new StringBuilder();
-            AppendCreateOrAlterProc(table, key, alter, sb);
+            AppendCreateOrAlterProc(table, options, sb);
             foreach (var c in table.Columns.Where(c => !c.IsIdentity)) // we want a row version parameter, but it is ignored
             {
                 var optional = c.IsAuditColumn() || c.IsSequenceNumber() || c.IsRowVersion() ? " = NULL" : "";
@@ -21,7 +21,7 @@ namespace SqlGen.Generators
             sb.AppendLine();
             sb.AppendLine("AS");
             sb.AppendLine();
-            sb.Append(base.Generate(table, key, alter));
+            sb.Append(base.Generate(table, options));
             return sb.ToString();
         }
 

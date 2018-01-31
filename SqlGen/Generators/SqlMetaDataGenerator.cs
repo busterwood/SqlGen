@@ -5,7 +5,7 @@ namespace SqlGen
 {
     class SqlMetaDataGenerator : Generator
     {
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
             var sb = new StringBuilder();
             var varName = (table.TableName + "_TABLE_TYPE").ToPascalCase() + "Schema =";

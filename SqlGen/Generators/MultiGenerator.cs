@@ -10,8 +10,7 @@ namespace SqlGen
     {
         readonly string connectionString;
 
-        public bool Grant { get; set; }
-        public bool Alter { get; set; }
+        public GeneratorOptions Options { get; set; }
 
         public MultiGenerator(string connectionString)
         {
@@ -31,13 +30,14 @@ namespace SqlGen
 
                 foreach (var key in keys.Any() ? keys : new TableKey[] { null })
                 {
+                    var options = Options.WithKey(key);
                     foreach (var gen in generators)
                     {
                         var sqlGen = gen as SqlGenerator;
                         if (sqlGen != null)
-                           GenerateSql(sb, table, key, gen as SqlGenerator);
+                           GenerateSql(sb, table, options, gen as SqlGenerator);
                         else
-                            sb.AppendLine(gen.Generate(table, key));
+                            sb.AppendLine(gen.Generate(table, options));
                     }
                 }
             }
@@ -45,14 +45,14 @@ namespace SqlGen
             return sb.ToString();
         }
 
-        private void GenerateSql(StringBuilder sb, Table table, TableKey key, SqlGenerator gen)
+        private void GenerateSql(StringBuilder sb, Table table, GeneratorOptions options, SqlGenerator gen)
         {
-            sb.AppendLine(gen.Generate(table, key, Alter));
+            sb.AppendLine(gen.Generate(table, options));
             sb.Append(gen.BatchSeparator());
 
-            if (Grant)
+            if (options.Grant)
             {
-                var grantSql = gen.Grant(table, key);
+                var grantSql = gen.Grant(table, options.Key);
                 if (grantSql != null)
                 {
                     sb.AppendLine(grantSql);

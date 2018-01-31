@@ -16,9 +16,9 @@ namespace SqlGen
             return $@"GRANT EXECUTE ON {GrantType()}::{ObjectName(table, key)} TO [db_execproc] AS [dbo];";
         }
 
-        protected void AppendCreateOrAlterProc(Table table, TableKey key, bool alter, StringBuilder sb)
+        protected void AppendCreateOrAlterProc(Table table, GeneratorOptions options, StringBuilder sb)
         {
-            AppendCreateOrAlterProc(ObjectName(table, key), alter, sb);
+            AppendCreateOrAlterProc(ObjectName(table, options.Key), options.Alter, sb);
         }
 
         protected void AppendCreateOrAlterProc(string procName, bool alter, StringBuilder sb)

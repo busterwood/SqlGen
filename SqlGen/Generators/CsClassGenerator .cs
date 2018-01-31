@@ -5,7 +5,7 @@ namespace SqlGen
 {
     class CsClassGenerator : Generator
     {
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
             var csClassName = table.TableName.ToPascalCase();
             var csArgsName = char.ToLower(csClassName[0]) + csClassName.Substring(1);

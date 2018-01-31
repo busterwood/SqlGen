@@ -7,7 +7,7 @@ namespace SqlGen.Generators
     {
         public override string ObjectName(Table table, TableKey key = null) => $"[{table.Schema}].[{table.TableName}]";
 
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"UPDATE [{table.Schema}].[{table.TableName}]");

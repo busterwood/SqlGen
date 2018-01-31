@@ -16,18 +16,18 @@ namespace SqlGen.Generators
             return $"[{table.Schema}].[{table.TableName}_GetBy{name}]";
         }
 
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
-            if (key == null)
-                return GenerateCore(table, ObjectName(table, null), alter, table.PrimaryKey);
+            if (options.Key == null)
+                return GenerateCore(table, ObjectName(table, null), options, table.PrimaryKey);
             else
-                return GenerateCore(table, ObjectName(table, key), alter, key);
+                return GenerateCore(table, ObjectName(table, options.Key), options, options.Key);
         }
 
-        private string GenerateCore(Table table, string procName, bool alter, IEnumerable<Column> keysColumns)
+        private string GenerateCore(Table table, string procName, GeneratorOptions options, IEnumerable<Column> keysColumns)
         {
             var sb = new StringBuilder();
-            AppendCreateOrAlterProc(procName, alter, sb);
+            AppendCreateOrAlterProc(procName, options.Alter, sb);
             foreach (var c in keysColumns)
             {
                 sb.AppendLine($"    @{c} {c.TypeDeclaration()},");

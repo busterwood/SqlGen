@@ -11,15 +11,15 @@ namespace SqlGen.Generators
 
         public override string ObjectName(Table table, TableKey key = null) => $"[{table.Schema}].[{table.TableName}_MergeTable]";
 
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
             var sb = new StringBuilder();
-            AppendCreateOrAlterProc(table, key, alter, sb);
-            AddFKParameters(key, sb);
+            AppendCreateOrAlterProc(table, options, sb);
+            AddFKParameters(options.Key, sb);
             sb.AppendLine($"    @recs [{table.Schema}].[{table.TableName}_TABLE_TYPE] READONLY");
             sb.AppendLine("AS");
             sb.AppendLine();
-            ExecAuditProc(table, key, sb);
+            ExecAuditProc(table, options.Key, sb);
 
             sb.AppendLine($"MERGE INTO [{table.Schema}].[{table.TableName}] as target");
             sb.AppendLine($"USING @recs AS src");
@@ -31,7 +31,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"WHEN MATCHED THEN");
             sb.AppendLine($"UPDATE SET");
             AddUpdateAssignments(table, sb);
-            AddOptionalDelete(key, sb);
+            AddOptionalDelete(options.Key, sb);
             AddOutput(table, sb);
 
             return sb.ToString();

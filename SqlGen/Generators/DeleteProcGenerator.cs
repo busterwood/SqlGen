@@ -16,13 +16,13 @@ namespace SqlGen.Generators
             return $"[{table.Schema}].[{table.TableName}_DeleteBy{name}]";
         }
 
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
-            IEnumerable<Column> keyCols = key ?? table.PrimaryKey;
+            IEnumerable<Column> keyCols = options.Key ?? table.PrimaryKey;
 
             var sb = new StringBuilder();
 
-            AppendCreateOrAlterProc(ObjectName(table, key), alter, sb);
+            AppendCreateOrAlterProc(ObjectName(table, options.Key), options.Alter, sb);
             foreach (var c in keyCols)
             {
                 sb.AppendLine($"    @{c} {c.TypeDeclaration()},");

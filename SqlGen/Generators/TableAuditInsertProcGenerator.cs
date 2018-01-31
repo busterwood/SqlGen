@@ -12,7 +12,7 @@ namespace SqlGen.Generators
         string Generate(Table table, bool alter)
         {
             var sb = new StringBuilder();
-            AppendCreateOrAlterProc(table, null, alter, sb);
+            AppendCreateOrAlterProc(ObjectName(table, null), alter, sb);
             sb.AppendLine($"    @recs [{table.Schema}].[{table.TableName}_TABLE_TYPE] READONLY,");
             sb.AppendLine($"    @auditType CHAR(1) = 'U'");
             sb.AppendLine("AS");
@@ -42,15 +42,15 @@ namespace SqlGen.Generators
         }
 
         // generate audit for details replacement, e.g. replacement of all "order lines" from a FK of "order id"
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
-            if (key == null)
-                return Generate(table, alter);
+            if (options.Key == null)
+                return Generate(table, options.Alter);
 
             var sb = new StringBuilder();
-            AppendCreateOrAlterProc(table, key, alter, sb);
+            AppendCreateOrAlterProc(table, options, sb);
 
-            foreach (var c in key)
+            foreach (var c in options.Key)
             {
                 sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
             }
@@ -72,14 +72,14 @@ namespace SqlGen.Generators
             {
                 sb.Append($"src.[{c.ColumnName}] = recs.[{c.ColumnName}] AND ");
             }
-            foreach (var c in key)
+            foreach (var c in options.Key)
             {
                 sb.Append($"src.[{c.ColumnName}] = recs.[{c.ColumnName}] AND ");
             }
             sb.Length -= 5;
             sb.AppendLine();
             sb.AppendLine("WHERE");
-            foreach (var c in key)
+            foreach (var c in options.Key)
             {
                 sb.AppendLine($"    src.[{c.ColumnName}] = @{c.ColumnName} AND");
             }

@@ -8,10 +8,10 @@ namespace SqlGen.Generators
     {
         public override string ObjectName(Table table, TableKey key = null) => $"[{table.Schema}].[{table.TableName}_AUDIT_Insert]";
 
-        public override string Generate(Table table, TableKey key, bool alter)
+        public override string Generate(Table table, GeneratorOptions options)
         {
             var sb = new StringBuilder();
-            AppendCreateOrAlterProc(table, key, alter, sb);
+            AppendCreateOrAlterProc(table, options, sb);
             foreach (var c in table.PrimaryKey)
             {
                 sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
