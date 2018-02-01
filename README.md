@@ -8,7 +8,9 @@ Built in two parts:
 
 ![screen shot](https://github.com/busterwood/SqlGen/blob/master/screen-shot.png)
 
-### Connections
+### Server menu
+
+This lists the SQL Server connections configured for the application.
 
 You can add your own connection strings to the application by editing the `SqlGenUi.exe.config` file
 
