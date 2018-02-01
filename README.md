@@ -39,7 +39,7 @@ Some code generators support generation for a specific key, for example:
 
 ### Multiple selection
 
-You can select multiple items on the tables, keys and code generators list to create a large scripts.
+You can select multiple items on the tables, keys and code generators lists to create larger scripts.
 For example you may wish to:
 
 * create C# classes for multiple tables by selecting multiple tables and the `C# Class` code generator
