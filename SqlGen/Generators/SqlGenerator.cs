@@ -35,5 +35,22 @@ namespace SqlGen
             else
                 sb.AppendLine($"CREATE PROCEDURE {procName}");
         }
+
+        protected void AppendCreateOrAlterTrigger(Table table, bool alter, string action, StringBuilder sb)
+        {
+            if (alter)
+            {
+                var objectIdName = ObjectName(table).Replace("[", "").Replace("]", "");
+                sb.AppendLine($"IF OBJECT_ID('{objectIdName}', 'TR') IS NULL");
+                sb.AppendLine($"    EXEC('CREATE TRIGGER {ObjectName(table)} ON [{table.Schema}].[{table.TableName}] FOR {action} AS BEGIN END')");
+                sb.AppendLine("GO");
+                sb.AppendLine();
+                sb.Append("ALTER");
+            }
+            else
+                sb.Append("CREATE");
+            sb.AppendLine($" TRIGGER {ObjectName(table)} ON [{table.Schema}].[{table.TableName}]");
+        }
+
     }
 }

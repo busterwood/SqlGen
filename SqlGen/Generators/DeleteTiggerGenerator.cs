@@ -11,7 +11,7 @@ namespace SqlGen.Generators
         public override string Generate(Table table, GeneratorOptions options)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"CREATE TRIGGER {ObjectName(table)} ON [{table.Schema}].[{table.TableName}]");
+            AppendCreateOrAlterTrigger(table, options.Alter, "DELETE", sb);
             sb.AppendLine("FOR DELETE AS");
             sb.AppendLine("BEGIN");
             sb.AppendLine("    SET NO COUNT ON");
