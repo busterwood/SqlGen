@@ -44,3 +44,7 @@ For example you may wish to:
 
 * create C# classes for multiple tables by selecting multiple tables and the `C# Class` code generator
 * create multiple insert, update and delete procs by selecting a table and multiple code generators
+
+### Generated code
+
+This window shows the generated code.  You can drag & drop the code to a text editor, e.g. Visual Studio or Sql Server Management Studio.
