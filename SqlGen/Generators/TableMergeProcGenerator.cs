@@ -114,7 +114,7 @@ namespace SqlGen.Generators
             sb.Append($"WHEN NOT MATCHED BY SOURCE");
             foreach (var c in key)
             {
-                sb.Append($" AND target.[{c}] = src.[{c}]");
+                sb.Append($" AND target.[{c}] = @{c}");
             }
             sb.AppendLine(" THEN");
             sb.AppendLine("    DELETE");
