@@ -48,7 +48,9 @@
     <Compile Include="Generators\CsClassGenerator .cs" />
     <Compile Include="Generators\CsAssertGenerator.cs" />
     <Compile Include="Generators\CsCallUpdateProcGenerator.cs" />
+    <Compile Include="Generators\UpdateTiggerGenerator.cs" />
     <Compile Include="Generators\GetListProcGenerator.cs" />
+    <Compile Include="Generators\DeleteTiggerGenerator.cs" />
     <Compile Include="Generators\InsertGenerator.cs" />
     <Compile Include="Generators\MultiGenerator.cs" />
     <Compile Include="Generators\SqlGenerator.cs" />
