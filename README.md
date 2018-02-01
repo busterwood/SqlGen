@@ -43,6 +43,7 @@ You can select multiple items on the tables, keys and code generators lists to c
 For example you may wish to:
 
 * create C# classes for multiple tables by selecting multiple tables and the `C# Class` code generator
+* create procedures to select data by the primary and foreign keys by selecting multiple keys and the `Proc Get` code generator
 * create multiple insert, update and delete procs by selecting a table and multiple code generators
 
 ### Generated code
