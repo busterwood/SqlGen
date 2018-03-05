@@ -6,13 +6,21 @@ namespace SqlGen.Generators
 {
     class AuditInsertProcGenerator : SqlGenerator
     {
-        public override string ObjectName(Table table, TableKey key = null) => $"[{table.Schema}].[{table.TableName}_AUDIT_Insert]";
+        public override string ObjectName(Table table, TableKey key = null)
+        {
+            if (key == null)
+                return $"[{table.Schema}].[{table.TableName}_AUDIT_Insert]";
+
+            var name = string.Join("And", key.Select(c => c.ColumnName.ToPascalCase()));
+            return $"[{table.Schema}].[{table.TableName}_AUDIT_InsertBy{name}]";
+        }
 
         public override string Generate(Table table, GeneratorOptions options)
         {
             var sb = new StringBuilder();
             AppendCreateOrAlterProc(table, options, sb);
-            foreach (var c in table.PrimaryKey)
+            TableKey key = options.Key ?? table.PrimaryKey;
+            foreach (var c in key)
             {
                 sb.AppendLine($"    @{c} {c.TypeDeclaration()},");
             }
@@ -41,7 +49,7 @@ namespace SqlGen.Generators
             sb.AppendLine($"FROM");
             sb.AppendLine($"    [{table.Schema}].[{table.TableName}]");
             sb.AppendLine($"WHERE");
-            foreach (var c in table.PrimaryKey)
+            foreach (var c in key)
             {
                 sb.AppendLine($"    [{c}] = @{c} AND");
             }

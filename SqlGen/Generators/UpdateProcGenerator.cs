@@ -35,7 +35,7 @@ namespace SqlGen.Generators
             {
                 sb.Append($"@{c}=@{c}, ");
             }
-            sb.AppendLine("@auditType='D'"); // type = delete
+            sb.AppendLine("@auditType='U'"); // type = update
         }
 
         public override string GrantType() => "OBJECT";
